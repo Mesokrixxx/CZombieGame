@@ -34,7 +34,7 @@ typedef uint32_t	u32;
 typedef uint64_t	u64;
 
 typedef enum { false, true }		Bool;
-
-typedef struct Vec2 { f32 x, y; }	Vec2;
+typedef struct Vec2 { f32	x, y; }	Vec2;
+typedef struct iVec2 { i32	x, y; }	iVec2;
 
 #endif

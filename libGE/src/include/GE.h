@@ -15,6 +15,7 @@
 # include "sparseset.h"
 # include "events.h"
 # include "ecs.h"
+# include "default.h"
 
 typedef struct Instance {
 	SDL_Window		*window;
@@ -35,8 +36,5 @@ Event		*CreateEvent(char *typeName);
 void		DestroyEvent(Event *e);
 Bool		NewEventListener(char *typeName, void (*callback)(void *data));
 void		PublishEvent(Event *e);
-
-// Default
-Bool		InitDefaultContent();
 
 #endif

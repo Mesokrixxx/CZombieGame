@@ -63,11 +63,6 @@ void	LaunchInstance()
 				keyupEvent->data = &ev.key.keysym.scancode;
 				PublishEvent(keyupEvent);
 			}
-			else if (ev.type == SDL_MOUSEBUTTONDOWN)
-			{
-				mouseButtonDownEvent->data = &ev.button.button;
-				PublishEvent(mouseButtonDownEvent);
-			}
 			else if (ev.type == SDL_MOUSEBUTTONUP)
 			{
 				mouseButtonUpEvent->data = &ev.button.button;
@@ -75,13 +70,12 @@ void	LaunchInstance()
 			}
 			else if (ev.type == SDL_MOUSEWHEEL)
 			{
-				scrollEvent->data = &((Vec2){ ev.wheel.x, ev.wheel.y });
+				scrollEvent->data = &((iVec2){ ev.wheel.x, ev.wheel.y });
 				PublishEvent(scrollEvent);
 			}
 		}
 
 		const u8	*keyboardState = SDL_GetKeyboardState(NULL);
-
 		for (u16 i = 0; i < SDL_NUM_SCANCODES; i++)
 		{
 			if (keyboardState[i])
@@ -90,6 +84,24 @@ void	LaunchInstance()
 				PublishEvent(keydownEvent);
 			}	
 		}
+
+		iVec2		mousePos;
+		u32			mouseState = SDL_GetMouseState(&mousePos.x, &mousePos.y);
+		static i8	leftButton = SDL_BUTTON_LEFT;
+		static i8	rightButton = SDL_BUTTON_RIGHT;
+		
+		if (mouseState & SDL_BUTTON_LMASK)
+		{
+			mouseButtonDownEvent->data = &leftButton;
+			PublishEvent(mouseButtonDownEvent);
+		}
+		if (mouseState & SDL_BUTTON_RMASK)
+		{
+			mouseButtonDownEvent->data = &rightButton;
+			PublishEvent(mouseButtonDownEvent);
+		}
+		
+
 		
 		// update
 		

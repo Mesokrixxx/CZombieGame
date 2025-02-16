@@ -1,6 +1,5 @@
 NAME = libGE.a
 
-# Détection du système d'exploitation
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
     CC := gcc

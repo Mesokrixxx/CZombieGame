@@ -35,7 +35,7 @@ SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize, void (*freeComp)(v
 	ss->chunkSize = chunkSize;
 	ss->compSize = compSize;
 	ss->freeComp = freeComp;
-	ss->comp = 0;
+	ss->count = 0;
 	return (ss);
 }
 
@@ -44,6 +44,8 @@ Bool	ResizeSparseSet(SparseSet *ss)
 	u32		*tempReallocDense;
 	u32		*tempReallocSparse;
 	void	**tempReallocComp;
+
+	LOG("SS Resizing\n");
 
 	tempReallocDense = realloc(ss->dense, (ss->chunkSize + ss->count) * sizeof(u32));
 	if (!tempReallocDense)
@@ -61,22 +63,25 @@ Bool	ResizeSparseSet(SparseSet *ss)
 	ss->sparse = tempReallocSparse;
 	ss->comp = tempReallocComp;
 
+	LOG("SS Resized\n");
+
 	return (true);
 }
 
 Bool	AddToSparseSet(SparseSet *ss, void *comp, u32 id)
-{
+{	
 	if (!ss)
 		return ((void)LOG("Trying to add a comp to a NULL SparseSet\n"), false);
 	if (!comp)
-		return ((void)LOG("Trying to add a NULL comp to an SparseSet\n"), false);
-	if (ss->count % ss->chunkSize == 0)
+		return ((void)LOG("Trying to add a NULL comp to an SparseSet\n"), false);	
+	if (ss->count % ss->chunkSize == 0 && ss->count > 0)
 		if (!ResizeSparseSet(ss))
 			return ((void)LOG("Failed to resize SparseSet when adding a new comp\n"), false);
 	ss->comp[ss->count] = _malloc(ss->compSize);
 	if (!ss->comp[ss->count])
 		return ((void)LOG("Failed to allocate when adding a comp to an SparseSet\n"), false);
 	memcpy(ss->comp[ss->count], comp, ss->compSize);
+	
 	ss->dense[ss->count] = id;
 	ss->sparse[id] = ss->count;
 	ss->count++;

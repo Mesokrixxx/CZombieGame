@@ -2,13 +2,21 @@
 
 extern Instance	*instance;
 
+Bool	InitDefaultContent()
+{
+	if (!InitDefaultEventType()) return (false);
+	if (!InitDefaultEventListnerer()) return (false);
+
+	return (true);
+}
+
 static void defEndInstance(void *);
 
 static void	*keyCreator(void);
 static void	*mouseclickCreator(void);
 static void	*scrollCreator(void);
 
-Bool	InitDefaultContent()
+Bool	InitDefaultEventType()
 {
 	if (!RegisterEventType("keydown_event", keyCreator, NULL)) return (false);
 	if (!RegisterEventType("keyup_event", keyCreator, NULL)) return (false);
@@ -17,6 +25,11 @@ Bool	InitDefaultContent()
 	if (!RegisterEventType("scroll_event", scrollCreator, NULL)) return (false);
 	if (!RegisterEventType("quit_event", NULL, NULL)) return (false);
 
+	return (true);
+}
+
+Bool	InitDefaultEventListnerer()
+{
 	if (!NewEventListener("quit_event", defEndInstance)) return (false);
 
 	return (true);
@@ -50,8 +63,8 @@ static void	*mouseclickCreator(void)
 
 static void	*scrollCreator(void)
 {
-	Vec2	v;
-	Vec2	*v_ptr;
+	iVec2	v;
+	iVec2	*v_ptr;
 
 	v.x = 0;
 	v.y = 0;
