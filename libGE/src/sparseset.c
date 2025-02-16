@@ -1,6 +1,6 @@
 #include "GE.h"
 
-SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize)
+SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize, void (*freeComp)(void *))
 {
 	SparseSet	*ss;
 
@@ -34,6 +34,7 @@ SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize)
 
 	ss->chunkSize = chunkSize;
 	ss->compSize = compSize;
+	ss->freeComp = freeComp;
 	ss->comp = 0;
 	return (ss);
 }
@@ -75,7 +76,7 @@ Bool	AddToSparseSet(SparseSet *ss, void *comp, u32 id)
 	ss->comp[ss->count] = _malloc(ss->compSize);
 	if (!ss->comp[ss->count])
 		return ((void)LOG("Failed to allocate when adding a comp to an SparseSet\n"), false);
-	memcpy(ss->comp, comp, ss->compSize);
+	memcpy(ss->comp[ss->count], comp, ss->compSize);
 	ss->dense[ss->count] = id;
 	ss->sparse[id] = ss->count;
 	ss->count++;
@@ -97,6 +98,8 @@ void	RemoveFromSparseSet(SparseSet *ss, u32 id)
 	ss->dense[entityIndex] = lastEntityID;
 	ss->sparse[lastEntityID] = entityIndex;
 	
+	if (ss->freeComp)
+		ss->freeComp(ss->comp[entityIndex]);
 	_free(ss->comp[entityIndex]);
 	ss->comp[entityIndex] = ss->comp[ss->count - 1];
 	ss->comp[ss->count - 1] = NULL;
@@ -109,7 +112,11 @@ void	DestroySparseSet(SparseSet *ss)
 	if (!ss)
 		return ((void)LOG("Trying to destroy a NULL SparseSet\n"));
 	for (u32 i = 0; i < ss->count; i++)
+	{
+		if (ss->freeComp)
+			ss->freeComp(ss->comp[i]);
 		_free(ss->comp[i]);
+	}
 	_free(ss->comp);
 	_free(ss->dense);
 	_free(ss->sparse);

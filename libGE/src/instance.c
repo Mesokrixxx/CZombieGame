@@ -25,7 +25,7 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 	ASSERT(instance->glContext,
 		"Failed to create a glContext for new instance\n");
 
-	instance->eventTypeRegistry = CreateSparseSet(sizeof(EventType *), EVENTTYPE_CHUNK_SIZE);
+	instance->eventTypeRegistry = CreateSparseSet(sizeof(EventType), EVENTTYPE_CHUNK_SIZE, freeEventInRegistry);
 	ASSERT(instance->eventTypeRegistry,
 		"Failed to create event type registry for new instance\n");
 

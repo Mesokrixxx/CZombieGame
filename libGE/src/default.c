@@ -1,32 +1,31 @@
 #include "GE.h"
 
+extern Instance	*instance;
+
+static void defEndInstance(void *);
+
 static void	*keyCreator(void);
-
 static void	*mouseclickCreator(void);
-
 static void	*scrollCreator(void);
 
 Bool	InitDefaultContent()
 {
-	if (!RegisterEventType("keydown_event", keyCreator, NULL))
-		return (false);
-	
-	if (!RegisterEventType("keyup_event", keyCreator, NULL))
-		return (false);
+	if (!RegisterEventType("keydown_event", keyCreator, NULL)) return (false);
+	if (!RegisterEventType("keyup_event", keyCreator, NULL)) return (false);
+	if (!RegisterEventType("mousedown_event", mouseclickCreator, NULL)) return (false);
+	if (!RegisterEventType("mouseup_event", mouseclickCreator, NULL)) return (false);
+	if (!RegisterEventType("scroll_event", scrollCreator, NULL)) return (false);
+	if (!RegisterEventType("quit_event", NULL, NULL)) return (false);
 
-	if (!RegisterEventType("mousedown_event", mouseclickCreator, NULL))
-		return (false);
-
-	if (!RegisterEventType("mouseup_event", mouseclickCreator, NULL))
-		return (false);
-
-	if (!RegisterEventType("scroll_event", scrollCreator, NULL))
-		return (false);
-
-	if (!RegisterEventType("quit_event", NULL, NULL))
-		return (false);
+	if (!NewEventListener("quit_event", defEndInstance)) return (false);
 
 	return (true);
+}
+
+static void	defEndInstance(void *data)
+{
+	(void)data;
+	instance->running = false;
 }
 
 static void	*keyCreator(void)

@@ -22,7 +22,7 @@ void		DestroyInstance();
 Bool		RegisterEventType(char *typeName, void *(*defaultCreator)(void), void (*defaultRemover)(void *));
 Event		*CreateEvent(char *typeName);
 void		DestroyEvent(Event *e);
-void		NewEventListener(char *typeName, void (*callback)(void *data));
+Bool		NewEventListener(char *typeName, void (*callback)(void *data));
 void		PublishEvent(Event *e);
 
 // Default

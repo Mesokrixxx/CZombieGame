@@ -10,9 +10,10 @@ typedef struct SparseSet {
 	size_t	compSize;
 	size_t	chunkSize;
 	u32		count;
+	void	(*freeComp)(void *);
 }	SparseSet;
 
-SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize);
+SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize, void (*freeComp)(void *));
 Bool		ResizeSparseSet(SparseSet *ss);
 Bool		AddToSparseSet(SparseSet *ss, void *comp, u32 id);
 void		RemoveFromSparseSet(SparseSet *ss, u32 id);

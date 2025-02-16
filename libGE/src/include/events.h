@@ -12,6 +12,7 @@ typedef struct EventType {
 	void	(*defaultRemover)(void *);
 }	EventType;
 
+void		freeEventInRegistry(void *et);
 EventType	*GetEventType(char *typeName, u32 *typeID);
 
 typedef struct EventListener{
