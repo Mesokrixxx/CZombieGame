@@ -1,9 +1,20 @@
 #ifndef GAMEENGINE_H
 # define GAMEENGINE_H
 
+/* Détection de la plateforme */
+#if defined(_WIN32) || defined(_WIN64)
+    #define GE_WINDOWS
+    #include <windows.h>
+#elif defined(__APPLE__)
+    #define GE_MACOS
+#elif defined(__linux__)
+    #define GE_LINUX
+#endif
+
 # include "vars.h"
 # include "sparseset.h"
 # include "events.h"
+# include "ecs.h"
 
 typedef struct Instance {
 	SDL_Window		*window;

@@ -1,8 +1,25 @@
 NAME = libGE.a
 
-CC = cc
+# Détection du système d'exploitation
+ifeq ($(OS),Windows_NT)
+    DETECTED_OS := Windows
+    CC := gcc
+    LFLAGS = -lmingw32 -lSDL2main -lSDL2
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Darwin)
+        DETECTED_OS := macOS
+        CC := clang
+        LFLAGS = -lSDL2
+        FRAMEWORK = -framework OpenGL -framework Cocoa
+    else
+        DETECTED_OS := Linux
+        CC := cc
+        LFLAGS = -lSDL2
+    endif
+endif
+
 CFLAGS = -Wall -Werror -Wextra -I${INCLUDE_DIR}
-LFLAGS = -lSDL2
 
 INCLUDE_DIR = src/include/
 SRCS = $(shell find src -name '*.c')
