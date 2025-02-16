@@ -1,5 +1,7 @@
 #include "GE.h"
 
+f32			AimedFPS = 60;
+f32			CurrentFPS;
 Instance	*instance;
 
 Instance	*CreateInstance(const char *title, u32 width, u32 height)
@@ -101,15 +103,24 @@ void	LaunchInstance()
 			PublishEvent(mouseButtonDownEvent);
 		}
 		
-
-		
 		// update
-		
+
 		// Set bg color
 
 		// render
 
-		// update delta time
+		UpdateDeltaTime();
+		f32 frameTime = GetDeltaTime();
+		f32 targetFrameTime = 1.0f / AimedFPS;
+		
+		if (frameTime < targetFrameTime)
+		{
+			u32 delayTime = (u32)((targetFrameTime - frameTime) * 1000.0f);
+			if (delayTime > 0)
+				SDL_Delay(delayTime);
+		}
+		UpdateDeltaTime();
+		CurrentFPS = 1.0f / GetDeltaTime();
 	}
 
 	DestroyEvent(keydownEvent);

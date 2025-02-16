@@ -16,6 +16,7 @@
 # include "events.h"
 # include "ecs.h"
 # include "default.h"
+# include "dtime.h"
 
 typedef struct Instance {
 	SDL_Window		*window;
@@ -36,5 +37,8 @@ Event		*CreateEvent(char *typeName);
 void		DestroyEvent(Event *e);
 Bool		NewEventListener(char *typeName, void (*callback)(void *data));
 void		PublishEvent(Event *e);
+
+// Time
+f32			GetDeltaTime();
 
 #endif
