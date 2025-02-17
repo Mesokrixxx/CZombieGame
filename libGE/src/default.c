@@ -6,15 +6,16 @@ Bool	InitDefaultContent()
 {
 	if (!InitDefaultEventType()) return (false);
 	if (!InitDefaultEventListnerer()) return (false);
+	if (!InitDefaultComponents()) return (false);
 
 	return (true);
 }
 
-static void defEndInstance(void *);
-
 static void	*keyCreator(void);
 static void	*mouseclickCreator(void);
 static void	*scrollCreator(void);
+
+static void defaultEndInstance(void *);
 
 Bool	InitDefaultEventType()
 {
@@ -26,19 +27,6 @@ Bool	InitDefaultEventType()
 	if (!RegisterEventType("quit_event", NULL, NULL)) return (false);
 
 	return (true);
-}
-
-Bool	InitDefaultEventListnerer()
-{
-	if (!NewEventListener("quit_event", defEndInstance)) return (false);
-
-	return (true);
-}
-
-static void	defEndInstance(void *data)
-{
-	(void)data;
-	instance->running = false;
 }
 
 static void	*keyCreator(void)
@@ -72,3 +60,20 @@ static void	*scrollCreator(void)
 	return (v_ptr);
 }
 
+Bool	InitDefaultEventListnerer()
+{
+	if (!NewEventListener("quit_event", defaultEndInstance)) return (false);
+
+	return (true);
+}
+
+static void	defaultEndInstance(void *data)
+{
+	(void)data;
+	instance->running = false;
+}
+
+Bool	InitDefaultComponents()
+{
+	return (true);
+}

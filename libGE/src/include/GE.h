@@ -23,6 +23,7 @@ typedef struct Instance {
 	SDL_GLContext	glContext;
 	SparseSet		*eventTypeRegistry;
 	EventListener	*eventBus;
+	ECS				*entities;
 	Bool			running;
 }	Instance;
 
@@ -40,5 +41,7 @@ void		PublishEvent(Event *e);
 
 // Time
 f32			GetDeltaTime();
+
+// Entities
 
 #endif

@@ -6,9 +6,13 @@ int	allocCount = 0;
 
 void	*malloc_debug(size_t size)
 {
+	void	*ptr = malloc(size);
+		
+	if (!ptr)
+		return (NULL);
 	allocCount++;
 	LOG("Allocating %zu bytes, current allocation count: %d\n", size, allocCount);
-	return (malloc(size));
+	return (ptr);
 }
 
 void	free_debug(void *ptr)

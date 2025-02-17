@@ -33,6 +33,10 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 
 	instance->eventBus = NULL;
 
+	instance->entities = CreateECS();
+	ASSERT(instance->entities,
+		"Failed to create ECS\n");
+
 	ASSERT(InitDefaultContent(),
 		"Failed to init all the default content\n");
 
@@ -135,6 +139,7 @@ void	DestroyInstance()
 {
 	DestroySparseSet(instance->eventTypeRegistry);
 	DestroyEventBus(instance->eventBus);
+	DestroyECS(instance->entities);
 
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);
