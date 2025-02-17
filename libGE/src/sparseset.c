@@ -8,7 +8,7 @@ Bool	CreateSparseSet(SparseSet *ss, size_t compSize, size_t chunkSize, void *(*d
 		LOG("Failed to create comp module of new SparseSet\n");
 		return (_free(ss), false);
 	}
-	bzero(ss->comp, chunkSize * compSize);
+	memset(ss->comp, 0, chunkSize * compSize);
 
 	ss->dense = _malloc(chunkSize * sizeof(u32));
 	if (!ss->dense)

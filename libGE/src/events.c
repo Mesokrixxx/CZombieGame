@@ -49,7 +49,7 @@ Bool	RegisterEventType(char *typeName, void *(*defaultCreator)(void), void (*def
 	return (true);
 }
 
-Event	*CreateEvent(char *typeName)
+Event	*NewEvent(char *typeName)
 {
 	Event		*e;
 	EventType	*et;

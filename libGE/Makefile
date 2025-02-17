@@ -1,9 +1,12 @@
 NAME = libGE.a
 
+# Détection de l'OS
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
     CC := gcc
+    SDL_INCLUDE = C:/w64devkit/include/
     LFLAGS = -lmingw32 -lSDL2main -lSDL2
+    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${SDL_INCLUDE}
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
@@ -16,26 +19,25 @@ else
         CC := cc
         LFLAGS = -lSDL2
     endif
+    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR)
 endif
 
-CFLAGS = -Wall -Werror -Wextra -I${INCLUDE_DIR}
 
 INCLUDE_DIR = src/include/
-SRCS = $(shell find src -name '*.c')
+SRCS = $(wildcard src/*.c src/**/*.c)
 OBJ = $(SRCS:.c=.o)
 
-all: ${NAME}
+all: $(NAME)
 
-debug:
-	${MAKE} "CFLAGS = ${CFLAGS} -DDEBUG" 
+debug: CFLAGS += -DDEBUG
+debug: clean all
 
-${NAME}: ${OBJ}
-	ar crs ${NAME} ${OBJ}
+$(NAME): $(OBJ)
+	ar crs $(NAME) $(OBJ)
 
 clean:
-	rm -f ${OBJ}
-	rm -f ${NAME}
+	rm -f $(OBJ) $(NAME)
 
 re: clean all
 
-.PHONY: all clean re
+.PHONY: all clean re debug

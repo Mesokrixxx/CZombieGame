@@ -9,7 +9,7 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 	instance = _malloc(sizeof(Instance));
 	ASSERT(instance,
 		"Failed to allocate for new instance\n");
-	bzero(instance, sizeof(Instance));
+	memset(instance, 0, sizeof(Instance));
 
 	ASSERT(!SDL_Init(SDL_INIT_VIDEO),
 		"Failed to initialise SDL\n");
@@ -51,12 +51,12 @@ void	LaunchInstance()
 {
 	SDL_Event	ev;
 
-	Event	*keydownEvent = CreateEvent("keydown_event");
-	Event	*keyupEvent = CreateEvent("keyup_event");
-	Event	*mouseButtonDownEvent = CreateEvent("mousedown_event");
-	Event	*mouseButtonUpEvent = CreateEvent("mouseup_event");
-	Event	*scrollEvent = CreateEvent("scroll_event");
-	Event	*quitEvent = CreateEvent("quit_event");
+	Event	*keydownEvent = NewEvent("keydown_event");
+	Event	*keyupEvent = NewEvent("keyup_event");
+	Event	*mouseButtonDownEvent = NewEvent("mousedown_event");
+	Event	*mouseButtonUpEvent = NewEvent("mouseup_event");
+	Event	*scrollEvent = NewEvent("scroll_event");
+	Event	*quitEvent = NewEvent("quit_event");
 
 	ASSERT(keydownEvent || keyupEvent || mouseButtonDownEvent || mouseButtonUpEvent || scrollEvent || quitEvent,
 		"Failed to create base events\n");

@@ -1,6 +1,16 @@
 #ifndef GAMEENGINE_VARS_H
 # define GAMEENGINE_VARS_H
 
+/* Détection de la plateforme */
+# if defined(_WIN32) || defined(_WIN64)
+#  define GE_WINDOWS
+#  include <windows.h>
+# elif defined(__APPLE__)
+#  define GE_MACOS
+# elif defined(__linux__)
+#  define GE_LINUX
+# endif
+
 # include <string.h>
 # include <stdio.h>
 # include <stdlib.h>

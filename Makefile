@@ -1,11 +1,13 @@
 NAME = ZombieGame
 
-# mingw et sdl2 pour windows 
+# Détection de l'OS
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
     NAME := $(NAME).exe
     CC := gcc
-    LFLAGS = -L$(LIB_DIR) -lGE -lmingw32 -lSDL2main -lSDL2
+    SDL2_DIR = C:/w64devkit
+    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(SDL2_DIR)/include
+    LFLAGS = -L$(LIB_DIR) -lGE -L$(SDL2_DIR)/lib -lmingw32 -lSDL2main -lSDL2
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
@@ -18,34 +20,32 @@ else
         CC := cc
         LFLAGS = -L$(LIB_DIR) -lGE -lSDL2
     endif
+    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${LIB_DIR}/include
 endif
 
-CFLAGS = -Wall -Werror -Wextra -I${INCLUDE_DIR} -I${LIB_DIR_INCLUDE}
-
-LIB_DIR = libGE/
-LIB_DIR_INCLUDE = ${LIB_DIR}src/include/
+LIB_DIR = libGE
 
 INCLUDE_DIR = src/include/
-SRCS = $(shell find src -name '*.c')
+SRCS = $(wildcard src/*.c src/**/*.c)
 OBJ = $(SRCS:.c=.o)
 
-all: lib ${NAME}
+all: lib $(NAME)
 
-debug: clean lib_debug ${NAME}
+debug: clean lib_debug $(NAME)
 
 lib_debug: 
-	cd ${LIB_DIR} && make debug
+	cd $(LIB_DIR) && make debug
 
 lib: 
-	cd ${LIB_DIR} && make
+	cd $(LIB_DIR) && make
 
-${NAME}: ${OBJ}
-	${CC} ${OBJ} ${CFLAGS} -o ${NAME} ${LFLAGS}
+$(NAME): $(OBJ)
+	$(CC) $(OBJ) $(CFLAGS) -o $(NAME) $(LFLAGS)
 
 clean:
-	rm -f ${OBJ}
-	rm -f ${NAME}
-	cd ${LIB_DIR} && make clean
+	rm -f $(OBJ)
+	rm -f $(NAME)
+	cd $(LIB_DIR) && make clean
 
 re: clean all
 

@@ -26,8 +26,11 @@ void	*defaultTransform()
 	return (t_ptr);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	if (!CreateInstance("Zombie Game", 1080, 720)) {
 		printf("Failed to create engine\n");
 		return (1);
