@@ -27,10 +27,13 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 	ASSERT(instance->glContext,
 		"Failed to create a glContext for new instance\n");
 
-	instance->eventTypeRegistry = CreateSparseSet(sizeof(EventType), EVENTTYPE_CHUNK_SIZE, freeEventInRegistry);
+	instance->eventTypeRegistry = _malloc(sizeof(SparseSet));
 	ASSERT(instance->eventTypeRegistry,
 		"Failed to create event type registry for new instance\n");
 
+	ASSERT(CreateSparseSet(instance->eventTypeRegistry, sizeof(EventType), EVENTTYPE_CHUNK_SIZE, NULL, freeEventInRegistry),
+		"Failed to create sparse set of eventTypeRegistry\n");
+			
 	instance->eventBus = NULL;
 
 	instance->entities = CreateECS();
@@ -138,6 +141,7 @@ void	LaunchInstance()
 void	DestroyInstance()
 {
 	DestroySparseSet(instance->eventTypeRegistry);
+	_free(instance->eventTypeRegistry);
 	DestroyEventBus(instance->eventBus);
 	DestroyECS(instance->entities);
 

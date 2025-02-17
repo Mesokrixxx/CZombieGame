@@ -11,12 +11,13 @@ typedef struct SparseSet {
 	size_t	chunkSize;
 	u32		count;
 	void	(*freeComp)(void *);
+	void	*(*defaultCreator)(void);
 }	SparseSet;
 
-SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize, void (*freeComp)(void *));
-Bool		ResizeSparseSet(SparseSet *ss);
-Bool		AddToSparseSet(SparseSet *ss, void *comp, u32 id);
-void		RemoveFromSparseSet(SparseSet *ss, u32 id);
-void		DestroySparseSet(SparseSet *ss);
+Bool	CreateSparseSet(SparseSet *ss, size_t compSize, size_t chunkSize, void *(*defaultCreator)(void), void (*freeComp)(void *));
+Bool	ResizeSparseSet(SparseSet *ss);
+Bool	AddToSparseSet(SparseSet *ss, void *comp, u32 id);
+void	RemoveFromSparseSet(SparseSet *ss, u32 id);
+void	DestroySparseSet(void *ss);
 
 #endif

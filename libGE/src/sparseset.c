@@ -1,42 +1,35 @@
 #include "GE.h"
 
-SparseSet	*CreateSparseSet(size_t compSize, size_t chunkSize, void (*freeComp)(void *))
-{
-	SparseSet	*ss;
-
-	ss = _malloc(sizeof(SparseSet));
-	if (!ss)
-	{
-		LOG("Failed to create new SparseSet\n");
-		return (NULL);
-	}
-	
+Bool	CreateSparseSet(SparseSet *ss, size_t compSize, size_t chunkSize, void *(*defaultCreator)(void), void (*freeComp)(void *))
+{	
 	ss->comp = _malloc(chunkSize * compSize);
 	if (!ss->comp)
 	{
 		LOG("Failed to create comp module of new SparseSet\n");
-		return (_free(ss), NULL);
+		return (_free(ss), false);
 	}
+	bzero(ss->comp, chunkSize * compSize);
 
 	ss->dense = _malloc(chunkSize * sizeof(u32));
 	if (!ss->dense)
 	{
 		LOG("Failed to create dense module of new SparseSet\n");
-		return (_free(ss->comp), _free(ss), NULL);
+		return (_free(ss->comp), _free(ss), false);
 	}
 
 	ss->sparse = _malloc(chunkSize * sizeof(u32));
 	if (!ss->sparse)
 	{
 		LOG("Failed to create sparse module of new SparseSet\n");
-		return (_free(ss->dense), _free(ss->comp), _free(ss), NULL);
+		return (_free(ss->dense), _free(ss->comp), _free(ss), false);
 	}
 
 	ss->chunkSize = chunkSize;
 	ss->compSize = compSize;
 	ss->freeComp = freeComp;
+	ss->defaultCreator = defaultCreator;
 	ss->count = 0;
-	return (ss);
+	return (true);
 }
 
 Bool	ResizeSparseSet(SparseSet *ss)
@@ -73,7 +66,11 @@ Bool	AddToSparseSet(SparseSet *ss, void *comp, u32 id)
 	if (!ss)
 		return ((void)LOG("Trying to add a comp to a NULL SparseSet\n"), false);
 	if (!comp)
-		return ((void)LOG("Trying to add a NULL comp to an SparseSet\n"), false);	
+	{
+		if (!ss->defaultCreator)
+			return ((void)LOG("Trying to add NULL comp with a non defined default creator\n"), false);
+		comp = ss->defaultCreator();
+	}	
 	if (ss->count % ss->chunkSize == 0 && ss->count > 0)
 		if (!ResizeSparseSet(ss))
 			return ((void)LOG("Failed to resize SparseSet when adding a new comp\n"), false);
@@ -112,18 +109,20 @@ void	RemoveFromSparseSet(SparseSet *ss, u32 id)
 	ss->count--;
 }
 
-void	DestroySparseSet(SparseSet *ss)
+void	DestroySparseSet(void *ss)
 {
 	if (!ss)
 		return ((void)LOG("Trying to destroy a NULL SparseSet\n"));
-	for (u32 i = 0; i < ss->count; i++)
+	
+	SparseSet	*SS = ss;
+
+	for (u32 i = 0; i < SS->count; i++)
 	{
-		if (ss->freeComp)
-			ss->freeComp(ss->comp[i]);
-		_free(ss->comp[i]);
+		if (SS->freeComp)
+			SS->freeComp(SS->comp[i]);
+		_free(SS->comp[i]);
 	}
-	_free(ss->comp);
-	_free(ss->dense);
-	_free(ss->sparse);
-	_free(ss);
+	_free(SS->comp);
+	_free(SS->dense);
+	_free(SS->sparse);
 }

@@ -6,14 +6,15 @@
 # define ENTITY_CHUNK_SIZE		128
 # define COMPONENT_CHUNK_SIZE	24
 
-typedef struct ComponentType {
-	char	*typeName;
-	u32		typeID;
-	void	*(*defaultCreator)(void);
-	void	(*defaultRemover)(void *);
-}	ComponentType;
+typedef enum {
+	FLAGS_CMP,
 
-void			freeComponentInECS(void *data);
+	//...
+
+	DEFAULT_COMP_COUNT,
+}	Component;
+
+u32		GetFlags(u32 entityID);
 
 typedef struct ECS {
 	SparseSet	*comps;

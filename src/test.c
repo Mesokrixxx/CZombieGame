@@ -1,5 +1,31 @@
 #include "test.h"
 
+typedef enum {
+	OFFSET = DEFAULT_COMP_COUNT,
+}	ComponentLocal;
+
+typedef struct {
+	Vec2	position;
+	Vec2	velocity;
+	i32		acceleration;
+	i32		deceleration;
+	i32		maxSpeed;
+}	Transform;
+
+void	*defaultTransform()
+{
+	Transform	t;
+	Transform	*t_ptr;
+
+	t.position = (Vec2){ 0, 0 };
+	t.velocity = (Vec2){ 0, 0 };
+	t.acceleration = 0;
+	t.deceleration = 0;
+	t.maxSpeed = 0;
+	t_ptr = &t;
+	return (t_ptr);
+}
+
 int main()
 {
 	if (!CreateInstance("Zombie Game", 1080, 720)) {

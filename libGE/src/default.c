@@ -75,5 +75,7 @@ static void	defaultEndInstance(void *data)
 
 Bool	InitDefaultComponents()
 {
+	if (!RegisterComponent(FLAGS_CMP, sizeof(u32), NULL, NULL)) return (false);
+
 	return (true);
 }
