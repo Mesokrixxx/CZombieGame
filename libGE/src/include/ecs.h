@@ -5,6 +5,7 @@
 
 # define ENTITY_CHUNK_SIZE		128
 # define COMPONENT_CHUNK_SIZE	24
+# define SYSTEM_CHUNK_SIZE		24
 
 typedef enum {
 	FLAGS_CMP,
@@ -14,10 +15,17 @@ typedef enum {
 	DEFAULT_COMPONENT_COUNT,
 }	Component;
 
-u32		GetFlags(u32 entityID);
+void	*GetComponent(u32 comp, u32 entityID);
+
+typedef struct System {
+	void	(*update)(u32, f32);
+	u32		requiredFlags;
+}	System;
 
 typedef struct ECS {
 	SparseSet	*comps;
+	System		*systems;
+	u32			systemsCount;
 	u32			entityCount;
 }	ECS;
 

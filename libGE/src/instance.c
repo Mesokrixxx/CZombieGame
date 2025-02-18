@@ -50,17 +50,19 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 void	LaunchInstance()
 {
 	SDL_Event	ev;
+	SparseSet	*flagsSS;
 
-	Event	*keydownEvent = NewEvent(KEYDOWN_EVTP);
-	Event	*keyupEvent = NewEvent(KEYUP_EVTP);
-	Event	*mouseButtonDownEvent = NewEvent(MOUSEDOWN_EVTP);
-	Event	*mouseButtonUpEvent = NewEvent(MOUSEUP_EVTP);
-	Event	*scrollEvent = NewEvent(SCROLL_EVTP);
-	Event	*quitEvent = NewEvent(QUIT_EVTP);
+	Event		*keydownEvent = NewEvent(KEYDOWN_EVTP);
+	Event		*keyupEvent = NewEvent(KEYUP_EVTP);
+	Event		*mouseButtonDownEvent = NewEvent(MOUSEDOWN_EVTP);
+	Event		*mouseButtonUpEvent = NewEvent(MOUSEUP_EVTP);
+	Event		*scrollEvent = NewEvent(SCROLL_EVTP);
+	Event		*quitEvent = NewEvent(QUIT_EVTP);
 
 	ASSERT(keydownEvent || keyupEvent || mouseButtonDownEvent || mouseButtonUpEvent || scrollEvent || quitEvent,
 		"Failed to create base events\n");
 
+	flagsSS = instance->entities->comps->comp[instance->entities->comps->sparse[FLAGS_CMP]];
 	while (instance->running)
 	{
 		while (SDL_PollEvent(&ev))
@@ -110,7 +112,20 @@ void	LaunchInstance()
 			PublishEvent(mouseButtonDownEvent);
 		}
 		
-		// update
+		float	dt = GetDeltaTime();
+		for (u32 i = 0; i < instance->entities->systemsCount; i++)
+		{
+			System s = instance->entities->systems[i];
+
+			for (u32 j = 0; j < flagsSS->count; j++)
+			{
+				u32 entityID = flagsSS->dense[j];
+				u32 entityFlags = *(u32 *)GetComponent(FLAGS_CMP, entityID);
+
+				if ((entityFlags & s.requiredFlags) == s.requiredFlags)
+					s.update(entityID, dt);
+			}
+		}
 
 		// Set bg color
 

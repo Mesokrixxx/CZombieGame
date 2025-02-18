@@ -34,6 +34,7 @@ f32			GetDeltaTime();
 
 // Entities
 Bool		RegisterComponent(u32 compID, size_t compSize, void *(*defaultCreator)(void), void (*defaultRemover)(void *));
+Bool		RegisterSystem(u32 requiredFlags, void (*update)(u32 entityID, f32 dt));
 u32			CreateEntity(u32 flags);
 void		RemoveEntity(u32 entityID);
 

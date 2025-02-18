@@ -17,6 +17,12 @@ ECS		*CreateECS()
 	if (!CreateSparseSet(ecs->comps, sizeof(SparseSet), COMPONENT_CHUNK_SIZE, NULL, DestroySparseSet))
 		return (_free(ecs->comps), _free(ecs), (void)LOG("Failed to create sparseset\n"), NULL);
 
+	ecs->systems = _malloc(sizeof(System) * SYSTEM_CHUNK_SIZE);
+	if (!ecs->systems)
+		return (DestroySparseSet(ecs->comps), _free(ecs->comps), _free(ecs),
+			(void)LOG("Failed to allocate for systems in ECS\n"), NULL);
+	ecs->systemsCount = 0;
+
 	ecs->entityCount = 0;
 	return (ecs);
 }
@@ -28,6 +34,7 @@ void	DestroyECS(ECS *ecs)
 
 	DestroySparseSet(ecs->comps);
 	_free(ecs->comps);
+	_free(ecs->systems);
 	_free(ecs);
 }
 
@@ -41,6 +48,28 @@ Bool		RegisterComponent(u32 compID, size_t compSize, void *(*defaultCreator)(voi
 	if (!AddToSparseSet(instance->entities->comps, &ss, compID))
 		return ((void)LOG("Failed to register new comp\n"), false);
 
+	return (true);
+}
+
+Bool	RegisterSystem(u32 requiredFlags, void (*update)(u32 entityID, f32 dt))
+{
+	ECS		*ecs;
+	System	s;
+	System	*tempSRegistry;
+
+	s.requiredFlags = requiredFlags;
+	s.update = update;
+
+	ecs = instance->entities;
+	if (ecs->systemsCount % SYSTEM_CHUNK_SIZE == 0 && ecs->systemsCount > 0)
+	{
+		tempSRegistry = realloc(ecs->systems, ecs->systemsCount + SYSTEM_CHUNK_SIZE);
+		if (!tempSRegistry)
+			return ((void)LOG("Failed to resize system registry\n"), false);
+		ecs->systems = tempSRegistry;
+	}
+
+	ecs->systems[ecs->systemsCount] = s;
 	return (true);
 }
 
@@ -67,14 +96,14 @@ u32	CreateEntity(u32 flags)
 	return (entityID);
 }
 
-u32		GetFlags(u32 entityID)
+void	*GetComponent(u32 comp, u32 entityID)
 {
 	SparseSet	*comps;
-	SparseSet	*ssOfFlags;
+	SparseSet	*ss;
 
 	comps = instance->entities->comps;
-	ssOfFlags = comps->comp[comps->sparse[FLAGS_CMP]];
-	return (*(u32 *)ssOfFlags->comp[ssOfFlags->sparse[entityID]]);
+	ss = comps->comp[comps->sparse[comp]];
+	return (ss->comp[ss->sparse[entityID]]);
 }
 
 void	RemoveEntity(u32 entityID)
@@ -83,7 +112,7 @@ void	RemoveEntity(u32 entityID)
 	u32			flags;
 
 	comps = instance->entities->comps;
-	flags = GetFlags(entityID);
+	flags = *(u32 *)GetComponent(FLAGS_CMP, entityID);
 	if (!flags)
 		return ((void)LOG("Flags of entity wasn't found\n"));
 	for (u32 i = 0; i < comps->count; i++)
