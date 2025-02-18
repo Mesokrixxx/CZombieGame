@@ -23,10 +23,10 @@ void		LaunchInstance();
 void		DestroyInstance();
 
 // Events
-Bool		RegisterEventType(char *typeName, void *(*defaultCreator)(void), void (*defaultRemover)(void *));
-Event		*NewEvent(char *typeName);
+Bool		RegisterEventType(u32 evtp, void *(*defaultCreator)(void), void (*defaultRemover)(void *));
+Event		*NewEvent(u32 evtp);
 void		DestroyEvent(Event *e);
-Bool		NewEventListener(char *typeName, void (*callback)(void *data));
+Bool		NewEventListener(u32 evtp, void (*callback)(void *data));
 void		PublishEvent(Event *e);
 
 // Time

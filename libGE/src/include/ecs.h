@@ -11,7 +11,7 @@ typedef enum {
 
 	//...
 
-	DEFAULT_COMP_COUNT,
+	DEFAULT_COMPONENT_COUNT,
 }	Component;
 
 u32		GetFlags(u32 entityID);

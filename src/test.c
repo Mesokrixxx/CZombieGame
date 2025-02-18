@@ -1,8 +1,12 @@
 #include "test.h"
 
 typedef enum {
-	OFFSET = DEFAULT_COMP_COUNT,
+	OFFSET_CMP = DEFAULT_COMPONENT_COUNT,
 }	ComponentLocal;
+
+typedef enum {
+	OFFSET_ETP = DEFAULT_EVENT_TYPE_COUNT,
+}	EventTypeIDLocal;
 
 typedef struct {
 	Vec2	position;

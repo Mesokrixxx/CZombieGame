@@ -2,11 +2,6 @@
 
 extern Instance	*instance;
 
-void	freeEventInRegistry(void *et)
-{
-	_free(((EventType *)et)->typeName);
-}
-
 void	DestroyEventBus(EventListener *eb)
 {
 	EventListener	*temp;
@@ -24,39 +19,32 @@ void	DestroyEventBus(EventListener *eb)
 	_free(eb);
 }
 
-Bool	RegisterEventType(char *typeName, void *(*defaultCreator)(void), void (*defaultRemover)(void *))
+Bool	RegisterEventType(u32 evtp, void *(*defaultCreator)(void), void (*defaultRemover)(void *))
 {
 	EventType	et;
 
 	if (!instance || !instance->eventTypeRegistry)
-		return ((void)LOG("Can't create a new event type: instance not yet created (%s)\n", typeName), false);
-	
-	if (!typeName)
-		return ((void)LOG("Can't create a new event type: typeName can't be NULL\n"), false);	
-	et.typeName = _malloc((strlen(typeName) + 1) * sizeof(char));
-	if (!et.typeName)
-		return ((void)LOG("Failed to register a new event type: allocation for name failed (%s)\n", typeName), false);
-	strcpy(et.typeName, typeName);
+		return ((void)LOG("Can't create a new event type: instance not yet created\n"), false);
 
 	et.defaultCreator = defaultCreator;
 	et.defaultRemover = defaultRemover;
 
-	et.typeID = instance->eventTypeRegistry->count;
+	et.typeID = evtp;
 	if (!AddToSparseSet(instance->eventTypeRegistry, &et, et.typeID))
-		return ((void)LOG("Failed to register a new event type: failure when adding it to the registry (%s)\n", typeName),
-			_free(et.typeName), false);
+		return ((void)LOG("Failed to register a new event type: failure when adding it to the registry\n"),
+			false);
 
 	return (true);
 }
 
-Event	*NewEvent(char *typeName)
+Event	*NewEvent(u32 evtp)
 {
 	Event		*e;
 	EventType	*et;
 
-	et = GetEventType(typeName, NULL);
+	et = GetEventType(evtp);
 	if (!et)
-		return ((void)LOG("Failed to create a new event: didn't found event type '%s'\n", typeName), NULL);
+		return ((void)LOG("Failed to create a new event: didn't found event type\n"), NULL);
 
 	e = _malloc(sizeof(Event));
 	if (!e)
@@ -74,7 +62,7 @@ void	DestroyEvent(Event *e)
 	if (!e)
 		return ((void)LOG("Faile to destroy NULL event\n"));
 	
-	et = GetEventType(NULL, &e->type);
+	et = GetEventType(e->type);
 	if (!et)
 		return ((void)LOG("Failed to destroy event: associated type not found\n"));
 
@@ -83,12 +71,12 @@ void	DestroyEvent(Event *e)
 	_free(e);
 }
 
-Bool	NewEventListener(char *typeName, void (*callback)(void *data))
+Bool	NewEventListener(u32 evtp, void (*callback)(void *data))
 {
 	EventListener	*el;
 	EventType		*et;
 
-	et = GetEventType(typeName, NULL);
+	et = GetEventType(evtp);
 	if (!et)
 		return ((void)LOG("Failed to create event listnener, event type not found\n"), false);
 	
@@ -130,28 +118,12 @@ void	PublishEvent(Event *e)
 		}
 		eb = eb->next;
 	}
-	LOG("No listeners found for published event\n");
 }
 
-EventType	*GetEventType(char *typeName, u32 *typeID)
-{
-	if (!typeName && !typeID)
-		return((void)LOG("Trying to find event type with both args set to NULL\n"), NULL);
-	
-	for (u32 i = 0; i < instance->eventTypeRegistry->count; i++)
-	{
-		EventType	*et = instance->eventTypeRegistry->comp[i];
+EventType	*GetEventType(u32 evtp)
+{	
+	SparseSet	*ss;
 
-		if (typeID)
-		{
-			if (*typeID == et->typeID)
-				return (et);
-		}
-		else if (typeName)
-		{
-			if (strcmp(typeName, et->typeName) == 0)
-				return (et);
-		}
-	}
-	return((void)LOG("No event type found with set args: %s, %d\n", typeName, *typeID), NULL);
+	ss = instance->eventTypeRegistry;
+	return (ss->comp[ss->sparse[evtp]]);
 }

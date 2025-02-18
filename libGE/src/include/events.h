@@ -3,17 +3,25 @@
 
 # include "vars.h"
 
+typedef enum {
+	KEYDOWN_EVTP,
+	KEYUP_EVTP,
+	MOUSEDOWN_EVTP,
+	MOUSEUP_EVTP,
+	SCROLL_EVTP,
+	QUIT_EVTP,
+	DEFAULT_EVENT_TYPE_COUNT,
+}	EventTypeID;
+
 # define EVENTTYPE_CHUNK_SIZE 24
 
 typedef struct EventType {
 	u32		typeID;
-	char	*typeName;
 	void	*(*defaultCreator)(void);
 	void	(*defaultRemover)(void *);
 }	EventType;
 
-void		freeEventInRegistry(void *et);
-EventType	*GetEventType(char *typeName, u32 *typeID);
+EventType	*GetEventType(u32 evtp);
 
 typedef struct EventListener{
 	u32						typeID;

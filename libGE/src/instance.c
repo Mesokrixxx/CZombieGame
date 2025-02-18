@@ -31,7 +31,7 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 	ASSERT(instance->eventTypeRegistry,
 		"Failed to create event type registry for new instance\n");
 
-	ASSERT(CreateSparseSet(instance->eventTypeRegistry, sizeof(EventType), EVENTTYPE_CHUNK_SIZE, NULL, freeEventInRegistry),
+	ASSERT(CreateSparseSet(instance->eventTypeRegistry, sizeof(EventType), EVENTTYPE_CHUNK_SIZE, NULL, NULL),
 		"Failed to create sparse set of eventTypeRegistry\n");
 			
 	instance->eventBus = NULL;
@@ -51,12 +51,12 @@ void	LaunchInstance()
 {
 	SDL_Event	ev;
 
-	Event	*keydownEvent = NewEvent("keydown_event");
-	Event	*keyupEvent = NewEvent("keyup_event");
-	Event	*mouseButtonDownEvent = NewEvent("mousedown_event");
-	Event	*mouseButtonUpEvent = NewEvent("mouseup_event");
-	Event	*scrollEvent = NewEvent("scroll_event");
-	Event	*quitEvent = NewEvent("quit_event");
+	Event	*keydownEvent = NewEvent(KEYDOWN_EVTP);
+	Event	*keyupEvent = NewEvent(KEYUP_EVTP);
+	Event	*mouseButtonDownEvent = NewEvent(MOUSEDOWN_EVTP);
+	Event	*mouseButtonUpEvent = NewEvent(MOUSEUP_EVTP);
+	Event	*scrollEvent = NewEvent(SCROLL_EVTP);
+	Event	*quitEvent = NewEvent(QUIT_EVTP);
 
 	ASSERT(keydownEvent || keyupEvent || mouseButtonDownEvent || mouseButtonUpEvent || scrollEvent || quitEvent,
 		"Failed to create base events\n");

@@ -19,12 +19,12 @@ static void defaultEndInstance(void *);
 
 Bool	InitDefaultEventType()
 {
-	if (!RegisterEventType("keydown_event", keyCreator, NULL)) return (false);
-	if (!RegisterEventType("keyup_event", keyCreator, NULL)) return (false);
-	if (!RegisterEventType("mousedown_event", mouseclickCreator, NULL)) return (false);
-	if (!RegisterEventType("mouseup_event", mouseclickCreator, NULL)) return (false);
-	if (!RegisterEventType("scroll_event", scrollCreator, NULL)) return (false);
-	if (!RegisterEventType("quit_event", NULL, NULL)) return (false);
+	if (!RegisterEventType(KEYDOWN_EVTP, keyCreator, NULL)) return (false);
+	if (!RegisterEventType(KEYUP_EVTP, keyCreator, NULL)) return (false);
+	if (!RegisterEventType(MOUSEDOWN_EVTP, mouseclickCreator, NULL)) return (false);
+	if (!RegisterEventType(MOUSEUP_EVTP, mouseclickCreator, NULL)) return (false);
+	if (!RegisterEventType(SCROLL_EVTP, scrollCreator, NULL)) return (false);
+	if (!RegisterEventType(QUIT_EVTP, NULL, NULL)) return (false);
 
 	return (true);
 }
@@ -62,7 +62,7 @@ static void	*scrollCreator(void)
 
 Bool	InitDefaultEventListnerer()
 {
-	if (!NewEventListener("quit_event", defaultEndInstance)) return (false);
+	if (!NewEventListener(QUIT_EVTP, defaultEndInstance)) return (false);
 
 	return (true);
 }
