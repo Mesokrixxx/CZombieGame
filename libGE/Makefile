@@ -3,7 +3,7 @@ NAME = libGE.a
 # Détection de l'OS
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
-    CC := gcc
+    CC := cc
     SDL_INCLUDE = C:/w64devkit/include/
     LFLAGS = -lmingw32 -lSDL2main -lSDL2
     CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${SDL_INCLUDE}
@@ -21,7 +21,6 @@ else
     endif
     CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR)
 endif
-
 
 INCLUDE_DIR = src/include/
 SRCS = $(wildcard src/*.c src/**/*.c)

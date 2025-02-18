@@ -4,7 +4,7 @@ NAME = ZombieGame
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
     NAME := $(NAME).exe
-    CC := gcc
+    CC := cc
     SDL2_DIR = C:/w64devkit
     CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(SDL2_DIR)/include
     LFLAGS = -L$(LIB_DIR) -lGE -L$(SDL2_DIR)/lib -lmingw32 -lSDL2main -lSDL2
