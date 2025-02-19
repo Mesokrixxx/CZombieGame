@@ -72,6 +72,8 @@ GLuint	CompileShader(GLenum type, const char *source)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
 		LOG("Shader error: compilation fail: %s\n", infoLog);
+		glDeleteShader(shader);
+		return 0;
 	}
 	return (shader);
 }
@@ -87,13 +89,31 @@ GLuint	CreateShaderProgram(const char *vertexShaderPath, const char *fragmentSha
 
 	vertexShaderSource = GetFileContent(vertexShaderPath);
 	if (!vertexShaderSource)
-		return ((void)LOG("Failed to get base vertex shader source\n"), 0);
+		return ((void)LOG("Failed to get vertex shader source\n"), 0);
+	
 	fragmentShaderSource = GetFileContent(fragmentShaderPath);
 	if (!fragmentShaderSource)
-		return ((void)LOG("Failed to get base vertex shader source\n"), _free(vertexShaderSource), 0);
+	{
+		_free(vertexShaderSource);
+		return ((void)LOG("Failed to get fragment shader source\n"), 0);
+	}
 
 	vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
+	if (!vertexShader)
+	{
+		_free(vertexShaderSource);
+		_free(fragmentShaderSource);
+		return 0;
+	}
+
 	fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+	if (!fragmentShader)
+	{
+		_free(vertexShaderSource);
+		_free(fragmentShaderSource);
+		glDeleteShader(vertexShader);
+		return 0;
+	}
 
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
@@ -105,16 +125,21 @@ GLuint	CreateShaderProgram(const char *vertexShaderPath, const char *fragmentSha
 	char infoLog[512];
 
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if(!success)
+	if (!success)
 	{
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		LOG("Shader error: compilation fail: %s\n", infoLog);
-		return (0);
+		LOG("Shader error: linking fail: %s\n", infoLog);
+		glDeleteProgram(shaderProgram);
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+		_free(vertexShaderSource);
+		_free(fragmentShaderSource);
+		return 0;
 	}
 
 	glDeleteShader(vertexShader);
-	_free(vertexShaderSource);
 	glDeleteShader(fragmentShader);
+	_free(vertexShaderSource);
 	_free(fragmentShaderSource);
 
 	glUseProgram(shaderProgram);
@@ -156,6 +181,30 @@ void		CreateCirleVAO(GLuint *circleVAO, GLuint *circleVBO, i32 segments)
 	glBindVertexArray(0);
 
 	_free(vertices);
+}
+
+void	CreateRectVAO(GLuint *vao, GLuint *vbo)
+{
+	f32 vertices[] = {
+		0.0f, 0.0f, // bas-gauche
+		0.0f, 1.0f, // haut-gauche
+		1.0f, 0.0f, // bas-droit
+		1.0f, 1.0f  // haut-droit
+	};
+
+	glGenVertexArrays(1, vao);
+	glGenBuffers(1, vbo);
+
+	glBindVertexArray(*vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(f32), NULL);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void		DrawCircle(Vec2 *pos, CircleSprite *circle)

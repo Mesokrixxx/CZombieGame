@@ -102,14 +102,14 @@ Mat4x4		Mat4x4Identity()
 
 void		TranslateMat4x4(Mat4x4 *m, Vec3 v)
 {
-	m->d.x = v.x;
-	m->d.y = v.y;
-	m->d.z = v.z;
+	m->d.x += v.x;
+	m->d.y += v.y;
+	m->d.z += v.z;
 }
 
 void		ScaleMat4x4(Mat4x4 *m, Vec3 v)
 {
-	m->a.x = v.x;
-	m->b.y = v.y;
-	m->c.z = v.z;
+	m->a.x *= v.x;
+	m->b.y *= v.y;
+	m->c.z *= v.z;
 }

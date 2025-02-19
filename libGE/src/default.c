@@ -18,6 +18,10 @@ static void	*mouseclickCreator(void);
 static void	*scrollCreator(void);
 
 static void defaultEndInstance(void *);
+static void	defaultKeyDownListener(void *data);
+static void	defaultKeyUpListener(void *data);
+
+Bool	justSwitchedDMode = false;
 
 Bool	InitDefaultEventType()
 {
@@ -65,6 +69,8 @@ static void	*scrollCreator(void)
 Bool	InitDefaultEventListnerer()
 {
 	if (!NewEventListener(QUIT_EVTP, defaultEndInstance)) return (false);
+	if (!NewEventListener(KEYDOWN_EVTP, defaultKeyDownListener)) return (false);
+	if (!NewEventListener(KEYUP_EVTP, defaultKeyUpListener)) return (false);
 
 	return (true);
 }
@@ -73,6 +79,25 @@ static void	defaultEndInstance(void *data)
 {
 	(void)data;
 	instance->running = false;
+}
+
+static void	defaultKeyDownListener(void *data)
+{
+	SDL_Scancode	s = *(SDL_Scancode *)data;
+
+	if (s == SDL_SCANCODE_G && !justSwitchedDMode)
+	{
+		instance->debugMode = !instance->debugMode;
+		justSwitchedDMode = true;
+	}
+}
+
+static void	defaultKeyUpListener(void *data)
+{
+	SDL_Scancode	s = *(SDL_Scancode *)data;
+
+	if (s == SDL_SCANCODE_G)
+		justSwitchedDMode = false;
 }
 
 Bool	InitDefaultComponents()
@@ -91,6 +116,13 @@ Bool	InitDefaultShaderProgram()
 	if (!AddToSparseSet(instance->shaderPrograms, &defaultCircle, SHADERPROG_CIRCLE_DEFAULT)) 
 		return (false);
 
+	GLuint debugUI = CreateShaderProgram(
+		"libGE/src/res/shaders/debugUI.vert",
+		"libGE/src/res/shaders/debugUI.frag");
+	
+	if (!AddToSparseSet(instance->shaderPrograms, &debugUI, SHADERPROG_DEBUGUI))
+		return (false);
+
 	return (true);
 }
 
@@ -100,6 +132,11 @@ Bool	InitDefaultVOs()
 
 	CreateCirleVAO(&circleVAO, &circleVBO, DEFAULT_CIRCLE_ROUNDNESS);
 	if (!RegisterVertexObject((VertexObject){ circleVAO, circleVBO }, CIRCLE_VO)) return (false);
+
+	GLuint	debugUIVAO, debugUIVBO;
+
+	CreateRectVAO(&debugUIVAO, &debugUIVBO);
+	if (!RegisterVertexObject((VertexObject){ debugUIVAO, debugUIVBO }, RECT_VO)) return (false);
 
 	return (true);
 }

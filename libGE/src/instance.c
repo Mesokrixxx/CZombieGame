@@ -73,6 +73,11 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 	ASSERT(CreateSparseSet(instance->VOs, sizeof(VertexObject), VERTEXOBJECT_CHUNK_SIZE, NULL, DestroyVertexObject),
 		"Failed to create sparse set of eventTypeRegistry\n");
 
+	instance->debugMode = false;
+	instance->debugUI = CreateUIDebugger();
+	ASSERT(instance->debugUI,
+		"Failed to create UI debugger\n");
+
 	ASSERT(InitDefaultContent(),
 		"Failed to init all the default content\n");
 
@@ -166,6 +171,9 @@ void	LaunchInstance()
 			}
 		}
 
+		if (instance->debugMode)
+			RenderDebugUI(instance->debugUI);
+
 		SDL_GL_SwapWindow(instance->window);
 
 		UpdateDeltaTimeNCapFPS();
@@ -197,6 +205,7 @@ void	DestroyInstance()
 	_free(instance->VOs);
 	DestroySparseSet(instance->shaderPrograms);
 	_free(instance->shaderPrograms);
+	DestroyUIDebugger(instance->debugUI);
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);
 	SDL_Quit();

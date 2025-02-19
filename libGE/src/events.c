@@ -110,12 +110,8 @@ void	PublishEvent(Event *e)
 	eb = instance->eventBus;
 	while (eb)
 	{
-		if (eb->typeID == e->type)
-		{
-			if (eb->callback)
-				eb->callback(e->data);
-			return ;
-		}
+		if (eb->typeID == e->type && eb->callback)
+			eb->callback(e->data);
 		eb = eb->next;
 	}
 }

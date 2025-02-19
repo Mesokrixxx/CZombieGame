@@ -10,11 +10,13 @@
 
 typedef enum {
 	CIRCLE_VO,
+	RECT_VO,
 	DEFAULT_VERTEX_OBJECT_COUNT,
 }	VertexObjectDefault;
 
 typedef enum {
 	SHADERPROG_CIRCLE_DEFAULT,
+	SHADERPROG_DEBUGUI,
 	DEFAULT_SHADER_PROGRAM_COUNT,
 }	ShaderProgramDefault;
 
@@ -29,6 +31,7 @@ void	DestroyVertexObject(void *vvo);
 Mat4x4	CreateOrthoProjMatrice();
 Mat4x4	CreateProjectionMatrice(ProjType pt);
 
+void	CreateRectVAO(GLuint *vao, GLuint *vbo);
 void	CreateCirleVAO(GLuint *circleVAO, GLuint *circleVBO, i32 segments);
 
 Bool	InitDefaultShaderProgram();
