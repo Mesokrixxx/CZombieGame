@@ -158,9 +158,9 @@ void		CreateCirleVAO(GLuint *circleVAO, GLuint *circleVBO, i32 segments)
 	_free(vertices);
 }
 
-void		DrawCircle(u32 shaderProgID, Vec2 *pos, CircleSprite *circle)
+void		DrawCircle(Vec2 *pos, CircleSprite *circle)
 {
-	GLuint	shaderProg = GetShaderProgram(shaderProgID);
+	GLuint	shaderProg = GetShaderProgram(SHADERPROG_CIRCLE_DEFAULT);
 	
 	UseShader(shaderProg);
 
@@ -172,13 +172,17 @@ void		DrawCircle(u32 shaderProgID, Vec2 *pos, CircleSprite *circle)
 
 	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
 	GLint	colorLoc = glGetUniformLocation(shaderProg, "color");
+	GLint	outlineSizeLoc = glGetUniformLocation(shaderProg, "outlineSize");
+	GLint	outlineColorLoc = glGetUniformLocation(shaderProg, "outlineColor");
 	float	matrix[16];
 	
 	Mat4x4ToFloat(model, matrix);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
-	
+	glUniform1f(outlineSizeLoc, circle->outlineSize);
 	glUniform4f(colorLoc, circle->color.r, circle->color.g,
 		circle->color.b, circle->color.a);
+	glUniform4f(outlineColorLoc, circle->outlineColor.r, circle->outlineColor.g,
+		circle->outlineColor.b, circle->outlineColor.a);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, DEFAULT_CIRCLE_ROUNDNESS);
 
 	glBindVertexArray(0);

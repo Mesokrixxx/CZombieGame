@@ -24,4 +24,5 @@ static void	LoadNewPlayer()
 	CircleSprite	*circleSprite = GetComponent(CIRCLE_SPRITE_CMP, playerID);
 	circleSprite->color = DARK_GRAY;
 	circleSprite->radius = 20;
+	circleSprite->outlineSize = 0.15f;
 }

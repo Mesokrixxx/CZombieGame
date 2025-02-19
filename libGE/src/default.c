@@ -84,11 +84,11 @@ Bool	InitDefaultComponents()
 
 Bool	InitDefaultShaderProgram()
 {
-	GLuint defaultColorNPos = CreateShaderProgram(
-		"libGE/src/res/shaders/baseVertex.vert",
-		"libGE/src/res/shaders/baseFragment.frag");
+	GLuint defaultCircle = CreateShaderProgram(
+		"libGE/src/res/shaders/defaultCircle.vert",
+		"libGE/src/res/shaders/defaultCircle.frag");
 
-	if (!AddToSparseSet(instance->shaderPrograms, &defaultColorNPos, SHADERPROG_POSNCOLOR_DEFAULT)) 
+	if (!AddToSparseSet(instance->shaderPrograms, &defaultCircle, SHADERPROG_CIRCLE_DEFAULT)) 
 		return (false);
 
 	return (true);

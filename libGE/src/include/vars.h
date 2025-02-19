@@ -91,6 +91,8 @@ typedef struct Color { f32	r, g, b, a; }	Color;
 typedef struct {
 	f32		radius;
 	Color	color;
+	f32		outlineSize;
+	Color	outlineColor;
 }	CircleSprite;
 
 typedef enum {

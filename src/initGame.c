@@ -53,5 +53,5 @@ static void	drawCircleSprite(u32 entityID, f32 dt)
 	CircleSprite	*bodyParams = GetComponent(CIRCLE_SPRITE_CMP, entityID);
 	
 	(void)dt;
-	DrawCircle(SHADERPROG_POSNCOLOR_DEFAULT, entityPos, bodyParams);
+	DrawCircle(entityPos, bodyParams);
 }

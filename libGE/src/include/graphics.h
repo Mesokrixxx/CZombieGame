@@ -14,7 +14,7 @@ typedef enum {
 }	VertexObjectDefault;
 
 typedef enum {
-	SHADERPROG_POSNCOLOR_DEFAULT,
+	SHADERPROG_CIRCLE_DEFAULT,
 	DEFAULT_SHADER_PROGRAM_COUNT,
 }	ShaderProgramDefault;
 
