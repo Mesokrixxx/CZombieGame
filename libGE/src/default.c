@@ -7,6 +7,7 @@ Bool	InitDefaultContent()
 	if (!InitDefaultEventType()) return (false);
 	if (!InitDefaultEventListnerer()) return (false);
 	if (!InitDefaultComponents()) return (false);
+	if (!InitDefaultVOs()) return (false);
 
 	return (true);
 }
@@ -76,6 +77,16 @@ static void	defaultEndInstance(void *data)
 Bool	InitDefaultComponents()
 {
 	if (!RegisterComponent(FLAGS_CMP, sizeof(u32), NULL, NULL)) return (false);
+
+	return (true);
+}
+
+Bool	InitDefaultVOs()
+{
+	GLuint	circleVAO, circleVBO;
+
+	CreateCirleVAO(&circleVAO, &circleVBO, DEFAULT_CIRCLE_ROUNDNESS);
+	if (!RegisterVertexObject((VertexObject){ circleVAO, circleVBO }, CIRCLE_VO)) return (false);
 
 	return (true);
 }

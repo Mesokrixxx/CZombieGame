@@ -5,21 +5,20 @@ ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
     NAME := $(NAME).exe
     CC := cc
-    SDL2_DIR = C:/w64devkit
-    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(SDL2_DIR)/include
-    LFLAGS = -L$(LIB_DIR) -lGE -L$(SDL2_DIR)/lib -lmingw32 -lSDL2main -lSDL2
+    DEFAULT_LIB_DIR = C:/w64devkit
+    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(DEFAULT_LIB_DIR)/include
+    LFLAGS = -lmingw32 -L$(LIB_DIR) -lGE -lglew32 -lopengl32 -lSDL2main -lSDL2
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
         DETECTED_OS := macOS
         CC := clang
-        LFLAGS = -L$(LIB_DIR) -lGE -lSDL2
         FRAMEWORK = -framework OpenGL -framework Cocoa
     else
         DETECTED_OS := Linux
         CC := cc
-        LFLAGS = -L$(LIB_DIR) -lGE -lSDL2
     endif
+    LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 
     CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${LIB_DIR}/include
 endif
 
@@ -48,5 +47,10 @@ clean:
 	cd $(LIB_DIR) && make clean
 
 re: clean all
+
+game:
+	rm -f $(OBJ)
+	rm -f $(NAME)
+	$(MAKE) $(NAME)
 
 .PHONY: all clean re

@@ -4,7 +4,7 @@ f32			AimedFPS = 60;
 f32			CurrentFPS;
 Instance	*instance;
 
-Instance	*CreateInstance(const char *title, u32 width, u32 height)
+Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType projType)
 {	
 	instance = _malloc(sizeof(Instance));
 	ASSERT(instance,
@@ -27,6 +27,19 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 	ASSERT(instance->glContext,
 		"Failed to create a glContext for new instance\n");
 
+	ASSERT(glewInit() == GLEW_OK,
+		"Failed to init GLEW\n");
+
+	instance->windowParam.h = height;
+	instance->windowParam.w = width;
+
+	instance->shaderProgram = CreateShaderProgram();
+
+	instance->projectionMatrice = _malloc(sizeof(f32) * 16);
+	ASSERT(instance->projectionMatrice,
+		"Failed to allocate for projection matrice \n");
+	Mat4x4ToFloat(CreateProjectionMatrice(projType), instance->projectionMatrice);
+
 	instance->eventTypeRegistry = _malloc(sizeof(SparseSet));
 	ASSERT(instance->eventTypeRegistry,
 		"Failed to create event type registry for new instance\n");
@@ -39,6 +52,16 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height)
 	instance->entities = CreateECS();
 	ASSERT(instance->entities,
 		"Failed to create ECS\n");
+
+
+	instance->bgCol = BLACK;
+
+	instance->VOs = _malloc(sizeof(SparseSet));
+	ASSERT(instance->VOs,
+		"Failed to create Vertex Object sparse set\n");
+	
+	ASSERT(CreateSparseSet(instance->VOs, sizeof(VertexObject), VERTEXOBJECT_CHUNK_SIZE, NULL, DestroyVertexObject),
+		"Failed to create sparse set of eventTypeRegistry\n");
 
 	ASSERT(InitDefaultContent(),
 		"Failed to init all the default content\n");
@@ -61,6 +84,10 @@ void	LaunchInstance()
 
 	ASSERT(keydownEvent || keyupEvent || mouseButtonDownEvent || mouseButtonUpEvent || scrollEvent || quitEvent,
 		"Failed to create base events\n");
+
+	glUseProgram(instance->shaderProgram);
+	GLint		projLoc = glGetUniformLocation(instance->shaderProgram, "projection");
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, instance->projectionMatrice);
 
 	flagsSS = instance->entities->comps->comp[instance->entities->comps->sparse[FLAGS_CMP]];
 	while (instance->running)
@@ -111,7 +138,13 @@ void	LaunchInstance()
 			mouseButtonDownEvent->data = &rightButton;
 			PublishEvent(mouseButtonDownEvent);
 		}
-		
+
+		glUseProgram(instance->shaderProgram);
+
+		glClearColor(instance->bgCol.r, instance->bgCol.g,
+			instance->bgCol.b, instance->bgCol.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		float	dt = GetDeltaTime();
 		for (u32 i = 0; i < instance->entities->systemsCount; i++)
 		{
@@ -122,14 +155,13 @@ void	LaunchInstance()
 				u32 entityID = flagsSS->dense[j];
 				u32 entityFlags = *(u32 *)GetComponent(FLAGS_CMP, entityID);
 
+				
 				if ((entityFlags & s.requiredFlags) == s.requiredFlags)
 					s.update(entityID, dt);
 			}
 		}
 
-		// Set bg color
-
-		// render
+		SDL_GL_SwapWindow(instance->window);
 
 		UpdateDeltaTime();
 		f32 frameTime = GetDeltaTime();
@@ -153,13 +185,21 @@ void	LaunchInstance()
 	DestroyEvent(quitEvent);
 }
 
+void	SetInstanceBGCol(Color c)
+{
+	instance->bgCol = c;
+}
+
 void	DestroyInstance()
 {
 	DestroySparseSet(instance->eventTypeRegistry);
 	_free(instance->eventTypeRegistry);
 	DestroyEventBus(instance->eventBus);
 	DestroyECS(instance->entities);
-
+	_free(instance->projectionMatrice);
+	DestroySparseSet(instance->VOs);
+	_free(instance->VOs);
+	glDeleteProgram(instance->shaderProgram);
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);
 	SDL_Quit();

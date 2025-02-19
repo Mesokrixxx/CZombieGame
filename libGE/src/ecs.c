@@ -70,6 +70,7 @@ Bool	RegisterSystem(u32 requiredFlags, void (*update)(u32 entityID, f32 dt))
 	}
 
 	ecs->systems[ecs->systemsCount] = s;
+	ecs->systemsCount++;
 	return (true);
 }
 
@@ -117,7 +118,7 @@ void	RemoveEntity(u32 entityID)
 		return ((void)LOG("Flags of entity wasn't found\n"));
 	for (u32 i = 0; i < comps->count; i++)
 	{
-		u32 compID = *(u32 *)comps->comp[comps->dense[i]];
+		u32 compID = comps->sparse[comps->dense[i]];
 
 		if (flags & compID)
 			RemoveFromSparseSet(comps->comp[comps->sparse[compID]], entityID);

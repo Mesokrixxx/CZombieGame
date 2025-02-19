@@ -1,10 +1,11 @@
 {
     "C_Cpp.default.compilerPath": "c:\\w64devkit\\bin\\gcc.exe",
     "files.associations": {
-        "test.h": "c",
-        "ge.h": "c",
-        "vars.h": "c",
-        "sdl.h": "c",
-        "game.h": "c"
-    }
+		"test.h": "c",
+		"ge.h": "c",
+		"vars.h": "c",
+		"sdl.h": "c",
+		"game.h": "c",
+		"sparseset.h": "c"
+	}
 }
