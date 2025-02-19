@@ -14,6 +14,11 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 	ASSERT(!SDL_Init(SDL_INIT_VIDEO),
 		"Failed to initialise SDL\n");
 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	
 	instance->window =
 		SDL_CreateWindow(
 			title,
@@ -26,6 +31,8 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 	instance->glContext = SDL_GL_CreateContext(instance->window);
 	ASSERT(instance->glContext,
 		"Failed to create a glContext for new instance\n");
+
+	SDL_GL_SetSwapInterval(0);
 
 	ASSERT(glewInit() == GLEW_OK,
 		"Failed to init GLEW\n");
@@ -113,11 +120,12 @@ void	LaunchInstance()
 		}
 
 		const u8	*keyboardState = SDL_GetKeyboardState(NULL);
-		for (u16 i = 0; i < SDL_NUM_SCANCODES; i++)
+		for (SDL_Scancode i = 0; i < SDL_NUM_SCANCODES; i++)
 		{
 			if (keyboardState[i])
 			{
-				keydownEvent->data = &i;
+				SDL_Scancode *scancode_ptr = &i;
+				keydownEvent->data = scancode_ptr;
 				PublishEvent(keydownEvent);
 			}	
 		}
@@ -160,17 +168,8 @@ void	LaunchInstance()
 
 		SDL_GL_SwapWindow(instance->window);
 
-		UpdateDeltaTime();
-		f32 frameTime = GetDeltaTime();
-		f32 targetFrameTime = 1.0f / AimedFPS;
-		
-		if (frameTime < targetFrameTime)
-		{
-			u32 delayTime = (u32)((targetFrameTime - frameTime) * 1000.0f);
-			if (delayTime > 0)
-				SDL_Delay(delayTime);
-		}
-		UpdateDeltaTime();
+		UpdateDeltaTimeNCapFPS();
+
 		CurrentFPS = 1.0f / GetDeltaTime();
 	}
 

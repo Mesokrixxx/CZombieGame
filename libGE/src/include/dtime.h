@@ -3,6 +3,6 @@
 
 # include "vars.h"
 
-void	UpdateDeltaTime();
+void	UpdateDeltaTimeNCapFPS();
 
 #endif

@@ -49,7 +49,6 @@ clean:
 re: clean all
 
 game:
-	rm -f $(OBJ)
 	rm -f $(NAME)
 	$(MAKE) $(NAME)
 

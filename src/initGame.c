@@ -20,7 +20,7 @@ static void	updatePosSystem(u32 entityID, f32 dt)
 	Vec2		*entityPos = GetComponent(POSITION_CMP, entityID);
 	Velocity	*entityVel = GetComponent(VELOCITY_CMP, entityID);
 
-	if (entityVel->vel.x != 0 && entityVel->vel.y != 0)
+	if (entityVel->vel.x != 0 || entityVel->vel.y != 0)
 	{
 		f32 currentSpeed = LenghtVec2(entityVel->vel);
 		
@@ -34,12 +34,13 @@ static void	updatePosSystem(u32 entityID, f32 dt)
 		}
 
 		// Decelerate
-		if (entityVel->deceleration > 1)
-			entityVel->deceleration = 1;
 		if (currentSpeed > 0 && entityVel->deceleration > 0) // if deceleration equal to 0 then no deceleration
 		{
-			f32 scale = 1 - entityVel->deceleration * dt;
-			entityVel->vel = ScaleVec2(entityVel->vel, scale > 0 ? scale : 0);
+			f32 decelAmount = entityVel->deceleration * dt;
+			if (currentSpeed <= decelAmount)
+				entityVel->vel = (Vec2){ 0 };
+			else
+				entityVel->vel = ScaleVec2(entityVel->vel, (currentSpeed - decelAmount) / currentSpeed);
 		}
 
 		// Update Pos
