@@ -12,13 +12,23 @@ void	*DefaultVec2Creator()
 
 void	*DefaultVelCreator()
 {
-	Velocity	v;
-	Velocity	*v_ptr;
+	VelParam	v;
+	VelParam	*v_ptr;
 
-	v = (Velocity){0};
+	v = (VelParam){0};
 	v.maxSpeed = -1;
 	v_ptr = &v;
 	return (v_ptr);
+}
+
+void	*DefaultSprintParamCreator()
+{
+	SprintParam	sp;	
+	SprintParam	*sp_ptr;
+	
+	sp = (SprintParam){ 0 };
+	sp_ptr = &sp;
+	return (sp_ptr);
 }
 
 void	*DefaultCircleSpriteCreator()
