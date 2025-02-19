@@ -7,6 +7,7 @@ Bool	InitDefaultContent()
 	if (!InitDefaultEventType()) return (false);
 	if (!InitDefaultEventListnerer()) return (false);
 	if (!InitDefaultComponents()) return (false);
+	if (!InitDefaultShaderProgram()) return (false);
 	if (!InitDefaultVOs()) return (false);
 
 	return (true);
@@ -77,6 +78,18 @@ static void	defaultEndInstance(void *data)
 Bool	InitDefaultComponents()
 {
 	if (!RegisterComponent(FLAGS_CMP, sizeof(u32), NULL, NULL)) return (false);
+
+	return (true);
+}
+
+Bool	InitDefaultShaderProgram()
+{
+	GLuint defaultColorNPos = CreateShaderProgram(
+		"libGE/src/res/shaders/baseVertex.vert",
+		"libGE/src/res/shaders/baseFragment.frag");
+
+	if (!AddToSparseSet(instance->shaderPrograms, &defaultColorNPos, SHADERPROG_POSNCOLOR_DEFAULT)) 
+		return (false);
 
 	return (true);
 }

@@ -50,7 +50,7 @@ Mat4x4	CreateOrthoProjMatrice()
 {
 	Mat4x4	m;
 
-	f32	right = 0.0f, left = instance->windowParam.w;
+	f32	left = 0.0f, right = instance->windowParam.w;
 	f32	top = 0.0f, bottom = instance->windowParam.h;
 	f32 nearP = -1.0f, farP = 1.0f;
 
@@ -113,4 +113,3 @@ void		ScaleMat4x4(Mat4x4 *m, Vec3 v)
 	m->b.y = v.y;
 	m->c.z = v.z;
 }
-

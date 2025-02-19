@@ -33,7 +33,11 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 	instance->windowParam.h = height;
 	instance->windowParam.w = width;
 
-	instance->shaderProgram = CreateShaderProgram();
+	instance->shaderPrograms = _malloc(sizeof(SparseSet));
+	ASSERT(instance->shaderPrograms,
+		"Failed to allocate for shaderProgram\n");
+	ASSERT(CreateSparseSet(instance->shaderPrograms, sizeof(GLuint), SHADERPROGRAM_CHUNK_SIZE, NULL, DestroyShaderProgram),
+		"Failed to create shader program sparse set\n");
 
 	instance->projectionMatrice = _malloc(sizeof(f32) * 16);
 	ASSERT(instance->projectionMatrice,
@@ -52,7 +56,6 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 	instance->entities = CreateECS();
 	ASSERT(instance->entities,
 		"Failed to create ECS\n");
-
 
 	instance->bgCol = BLACK;
 
@@ -84,10 +87,6 @@ void	LaunchInstance()
 
 	ASSERT(keydownEvent || keyupEvent || mouseButtonDownEvent || mouseButtonUpEvent || scrollEvent || quitEvent,
 		"Failed to create base events\n");
-
-	glUseProgram(instance->shaderProgram);
-	GLint		projLoc = glGetUniformLocation(instance->shaderProgram, "projection");
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, instance->projectionMatrice);
 
 	flagsSS = instance->entities->comps->comp[instance->entities->comps->sparse[FLAGS_CMP]];
 	while (instance->running)
@@ -138,8 +137,6 @@ void	LaunchInstance()
 			mouseButtonDownEvent->data = &rightButton;
 			PublishEvent(mouseButtonDownEvent);
 		}
-
-		glUseProgram(instance->shaderProgram);
 
 		glClearColor(instance->bgCol.r, instance->bgCol.g,
 			instance->bgCol.b, instance->bgCol.a);
@@ -199,7 +196,8 @@ void	DestroyInstance()
 	_free(instance->projectionMatrice);
 	DestroySparseSet(instance->VOs);
 	_free(instance->VOs);
-	glDeleteProgram(instance->shaderProgram);
+	DestroySparseSet(instance->shaderPrograms);
+	_free(instance->shaderPrograms);
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);
 	SDL_Quit();

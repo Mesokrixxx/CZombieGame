@@ -2,6 +2,8 @@
 
 extern Instance	*instance;
 
+GLuint	lastShaderProg;
+
 Bool	RegisterVertexObject(VertexObject vo, u32 voID)
 {
 	if (!AddToSparseSet(instance->VOs, &vo, voID))
@@ -23,6 +25,26 @@ GLuint	GetVBO(u32 voID)
 
 	ss = instance->VOs;
 	return (((VertexObject *)ss->comp[ss->sparse[voID]])->VBO);
+}
+
+GLuint	GetShaderProgram(u32 shaderProgID)
+{
+	SparseSet	*ss;
+
+	ss = instance->shaderPrograms;
+	return (*(GLuint *)ss->comp[ss->sparse[shaderProgID]]);
+}
+
+void		UseShader(GLuint shaderProg)
+{
+	static Bool	firstUse = true;
+	
+	if (firstUse || shaderProg != lastShaderProg)
+	{
+		glUseProgram(shaderProg);
+		lastShaderProg = shaderProg;
+		firstUse = false;
+	}
 }
 
 void	DestroyVertexObject(void *vvo)
@@ -54,7 +76,7 @@ GLuint	CompileShader(GLenum type, const char *source)
 	return (shader);
 }
 
-GLuint	CreateShaderProgram()
+GLuint	CreateShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath)
 {
 	GLuint	shaderProgram;
 
@@ -63,10 +85,10 @@ GLuint	CreateShaderProgram()
 	GLuint	fragmentShader;
 	char	*fragmentShaderSource;
 
-	vertexShaderSource = GetFileContent("libGE/src/res/shaders/baseVertex.vert");
+	vertexShaderSource = GetFileContent(vertexShaderPath);
 	if (!vertexShaderSource)
 		return ((void)LOG("Failed to get base vertex shader source\n"), 0);
-	fragmentShaderSource = GetFileContent("libGE/src/res/shaders/baseFragment.frag");
+	fragmentShaderSource = GetFileContent(fragmentShaderPath);
 	if (!fragmentShaderSource)
 		return ((void)LOG("Failed to get base vertex shader source\n"), _free(vertexShaderSource), 0);
 
@@ -87,12 +109,17 @@ GLuint	CreateShaderProgram()
 	{
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
 		LOG("Shader error: compilation fail: %s\n", infoLog);
+		return (0);
 	}
 
 	glDeleteShader(vertexShader);
 	_free(vertexShaderSource);
 	glDeleteShader(fragmentShader);
 	_free(fragmentShaderSource);
+
+	glUseProgram(shaderProgram);
+	GLint	projLoc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, instance->projectionMatrice);
 
 	return (shaderProgram);
 }
@@ -131,33 +158,35 @@ void		CreateCirleVAO(GLuint *circleVAO, GLuint *circleVBO, i32 segments)
 	_free(vertices);
 }
 
-void		DrawCircle(Vec2 *pos, CircleSprite *circle)
+void		DrawCircle(u32 shaderProgID, Vec2 *pos, CircleSprite *circle)
 {
+	GLuint	shaderProg = GetShaderProgram(shaderProgID);
+	
+	UseShader(shaderProg);
+
 	glBindVertexArray(GetVAO(CIRCLE_VO));
 	
 	Mat4x4	model = Mat4x4Identity();
 	TranslateMat4x4(&model, Vec3FromVec2(*pos, 0));
-	
-	GLint	modelLoc = glGetUniformLocation(instance->shaderProgram, "model");
-	GLint	colorLoc = glGetUniformLocation(instance->shaderProgram, "color");
+	ScaleMat4x4(&model, (Vec3){ circle->radius, circle->radius, 1 });
+
+	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
+	GLint	colorLoc = glGetUniformLocation(shaderProg, "color");
 	float	matrix[16];
 	
-	ScaleMat4x4(&model, (Vec3){ circle->radius + circle->outlineSize, circle->radius + circle->outlineSize, 1.0f });
 	Mat4x4ToFloat(model, matrix);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
 	
-	glUniform4f(colorLoc, circle->outlineColor.r, circle->outlineColor.g,
-		circle->outlineColor.b, circle->outlineColor.a);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, DEFAULT_CIRCLE_ROUNDNESS);
-		
-	ScaleMat4x4(&model, (Vec3){ circle->radius, circle->radius, 1 });
-	Mat4x4ToFloat(model, matrix);
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
-
-	
-	glUniform4f(colorLoc, circle->bodyColor.r, circle->bodyColor.g,
-		circle->bodyColor.b, circle->bodyColor.a);
+	glUniform4f(colorLoc, circle->color.r, circle->color.g,
+		circle->color.b, circle->color.a);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, DEFAULT_CIRCLE_ROUNDNESS);
 
 	glBindVertexArray(0);
+}
+
+void	DestroyShaderProgram(void *shaderProg)
+{
+	GLuint	*shprog = shaderProg;
+
+	glDeleteProgram(*shprog);
 }

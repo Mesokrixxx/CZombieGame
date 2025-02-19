@@ -21,6 +21,10 @@ typedef enum {
 	OFFSET_VO = DEFAULT_VERTEX_OBJECT_COUNT,
 }	VertexObjectLocal;
 
+typedef enum {
+	OFFSET_SHPROG = DEFAULT_SHADER_PROGRAM_COUNT,
+}	ShaderProgramLocal;
+
 typedef struct {
 	Vec2	vel;
 	f32		acceleration;

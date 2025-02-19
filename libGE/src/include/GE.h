@@ -22,7 +22,7 @@ typedef struct Instance {
 	
 	ECS				*entities;
 	
-	GLuint			shaderProgram;
+	SparseSet		*shaderPrograms;
 	f32				*projectionMatrice;
 	Color			bgCol;
 	SparseSet		*VOs;
@@ -53,10 +53,13 @@ u32			CreateEntity(u32 flags);
 void		RemoveEntity(u32 entityID);
 
 // Graphics
-void		DrawCircle(Vec2 *pos, CircleSprite *cicle);
+void		DrawCircle(u32 shaderProgID, Vec2 *pos, CircleSprite *cicle);
 Bool		RegisterVertexObject(VertexObject vo, u32 voID);
 GLuint		GetVAO(u32 voID);
 GLuint		GetVBO(u32 voID);
+GLuint		CreateShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath);
+GLuint		GetShaderProgram(u32 shaderProgID);
+void		UseShader(GLuint shaderProg);
 
 // Utils
 char		*GetFileContent(const char *filePath);

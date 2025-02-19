@@ -27,8 +27,7 @@ void	*DefaultCircleSpriteCreator()
 	CircleSprite	*cb_ptr;
 
 	cb = (CircleSprite){0};
-	cb.bodyColor = BLACK;
-	cb.outlineColor = BLACK;
+	cb.color = BLACK;
 	cb_ptr = &cb;
 	return (cb_ptr);
 }

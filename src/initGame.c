@@ -52,7 +52,6 @@ static void	drawCircleSprite(u32 entityID, f32 dt)
 	Vec2			*entityPos = GetComponent(POSITION_CMP, entityID);
 	CircleSprite	*bodyParams = GetComponent(CIRCLE_SPRITE_CMP, entityID);
 	
-	DrawCircle(entityPos, bodyParams);
-	
-	dt = dt;
+	(void)dt;
+	DrawCircle(SHADERPROG_POSNCOLOR_DEFAULT, entityPos, bodyParams);
 }

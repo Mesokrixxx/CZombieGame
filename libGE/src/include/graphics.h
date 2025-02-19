@@ -4,12 +4,19 @@
 # include "vars.h"
 
 # define DEFAULT_CIRCLE_ROUNDNESS 32
+
 # define VERTEXOBJECT_CHUNK_SIZE 24
+# define SHADERPROGRAM_CHUNK_SIZE 24
 
 typedef enum {
 	CIRCLE_VO,
 	DEFAULT_VERTEX_OBJECT_COUNT,
 }	VertexObjectDefault;
+
+typedef enum {
+	SHADERPROG_POSNCOLOR_DEFAULT,
+	DEFAULT_SHADER_PROGRAM_COUNT,
+}	ShaderProgramDefault;
 
 typedef struct {
 	GLuint	VAO;
@@ -24,7 +31,9 @@ Mat4x4	CreateProjectionMatrice(ProjType pt);
 
 void	CreateCirleVAO(GLuint *circleVAO, GLuint *circleVBO, i32 segments);
 
+Bool	InitDefaultShaderProgram();
+
 GLuint	CompileShader(GLenum type, const char *source);
-GLuint	CreateShaderProgram();
+void	DestroyShaderProgram(void *shaderProg);
 
 #endif

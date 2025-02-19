@@ -22,7 +22,6 @@ static void	LoadNewPlayer()
 	vel->maxSpeed = 20;
 	
 	CircleSprite	*circleSprite = GetComponent(CIRCLE_SPRITE_CMP, playerID);
-	circleSprite->bodyColor = DARK_GRAY;
-	circleSprite->outlineSize = 3;
+	circleSprite->color = DARK_GRAY;
 	circleSprite->radius = 20;
 }
