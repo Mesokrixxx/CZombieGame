@@ -196,7 +196,7 @@ void		CreateCirleVAO(GLuint *circleVAO, GLuint *circleVBO, i32 segments)
 	_free(vertices);
 }
 
-void	CreateRectVAO(GLuint *vao, GLuint *vbo)
+void	CreateRectVAO(GLuint *rectVAO, GLuint *rectVBO)
 {
 	f32 vertices[] = {
 		0.0f, 0.0f, // bas-gauche
@@ -205,12 +205,12 @@ void	CreateRectVAO(GLuint *vao, GLuint *vbo)
 		1.0f, 1.0f  // haut-droit
 	};
 
-	glGenVertexArrays(1, vao);
-	glGenBuffers(1, vbo);
+	glGenVertexArrays(1, rectVAO);
+	glGenBuffers(1, rectVBO);
 
-	glBindVertexArray(*vao);
+	glBindVertexArray(*rectVAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, *rectVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(f32), NULL);
@@ -220,7 +220,7 @@ void	CreateRectVAO(GLuint *vao, GLuint *vbo)
 	glBindVertexArray(0);
 }
 
-void		DrawCircle(Vec2 pos, CircleSprite *circle)
+void		DrawCircle(Vec2 pos, CircleSprite circle)
 {
 	GLuint	shaderProg = GetShaderProgram(SHADERPROG_CIRCLE_DEFAULT);
 	
@@ -230,7 +230,7 @@ void		DrawCircle(Vec2 pos, CircleSprite *circle)
 	
 	Mat4x4	model = Mat4x4Identity();
 	TranslateMat4x4(&model, Vec3FromVec2(pos, 0));
-	ScaleMat4x4(&model, (Vec3){ circle->radius, circle->radius, 1 });
+	ScaleMat4x4(&model, (Vec3){ circle.radius, circle.radius, 1 });
 
 	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
 	GLint	colorLoc = glGetUniformLocation(shaderProg, "color");
@@ -240,15 +240,15 @@ void		DrawCircle(Vec2 pos, CircleSprite *circle)
 	
 	Mat4x4ToFloat(model, matrix);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
-	glUniform1f(outlineSizeLoc, circle->outlineSize);
-	glUniform4f(colorLoc, circle->color.r, circle->color.g,
-		circle->color.b, circle->color.a);
-	glUniform4f(outlineColorLoc, circle->outlineColor.r, circle->outlineColor.g,
-		circle->outlineColor.b, circle->outlineColor.a);
+	glUniform1f(outlineSizeLoc, circle.outlineSize);
+	glUniform4f(colorLoc, circle.color.r, circle.color.g,
+		circle.color.b, circle.color.a);
+	glUniform4f(outlineColorLoc, circle.outlineColor.r, circle.outlineColor.g,
+		circle.outlineColor.b, circle.outlineColor.a);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, DEFAULT_CIRCLE_ROUNDNESS);
 }
 
-void	DrawRect(Vec2 pos, Vec2 size, Color c)
+void	DrawRect(Vec2 pos, RectSprite rect)
 {
 	GLuint	shaderProg = GetShaderProgram(SHADERPROG_RECT_DEFAULT);
 
@@ -258,16 +258,91 @@ void	DrawRect(Vec2 pos, Vec2 size, Color c)
 
 	Mat4x4	model = Mat4x4Identity();
 	TranslateMat4x4(&model, Vec3FromVec2(pos, 0));
-	ScaleMat4x4(&model, (Vec3){ size.x, size.y, 1 });
+	ScaleMat4x4(&model, (Vec3){ rect.width, rect.height, 1 });
 
 	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
 	GLint	colorLoc = glGetUniformLocation(shaderProg, "color");
+	GLint	outlineSizeLoc = glGetUniformLocation(shaderProg, "outlineSize");
+	GLint	outlineColorLoc = glGetUniformLocation(shaderProg, "outlineColor");
+	GLint	rectSizeLoc = glGetUniformLocation(shaderProg, "rectSize");
 	float	matrix[16];
 	
 	Mat4x4ToFloat(model, matrix);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
-	glUniform4f(colorLoc, c.r, c.g, c.b, c.a);
+	glUniform4f(colorLoc, rect.color.r, rect.color.g, rect.color.b, rect.color.a);
+	glUniform1f(outlineSizeLoc, rect.outlineSize);
+	glUniform4f(outlineColorLoc, rect.outlineColor.r, rect.outlineColor.g, rect.outlineColor.b, rect.outlineColor.a);
+	glUniform2f(rectSizeLoc, rect.width, rect.height);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void CreateCrossVAO(GLuint *crossVAO, GLuint *crossVBO)
+{
+    float size = 1.0f;
+    float thickness = 0.4f;
+    float halfThickness = thickness / 2.0f;
+
+    float vertices1[8] = {
+        -size, -halfThickness,
+         size, -halfThickness,
+         size,  halfThickness,
+        -size,  halfThickness
+    };
+
+    float vertices2[8] = {
+        -halfThickness, -size,
+         halfThickness, -size,
+         halfThickness,  size,
+        -halfThickness,  size
+    };
+
+    float vertices[16];
+    memcpy(vertices, vertices1, sizeof(vertices1));
+    memcpy(vertices + 8, vertices2, sizeof(vertices2));
+
+    glGenVertexArrays(1, crossVAO);
+    glGenBuffers(1, crossVBO);
+
+    glBindVertexArray(*crossVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, *crossVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void	DrawCross(Vec2 pos, CrossSprite cross)
+{
+	GLuint	shaderProg = GetShaderProgram(SHADERPROG_CROSS_DEFAULT);
+
+	UseShader(shaderProg);
+    
+    BindVAO(CROSS_VO);
+
+	Mat4x4	model = Mat4x4Identity();
+	TranslateMat4x4(&model, Vec3FromVec2(pos, 0));
+	ScaleMat4x4(&model, (Vec3){ cross.width, cross.height, 1 });
+	if (cross.angle != 0)
+		RotateMat4x4(&model, cross.angle);
+
+	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
+	GLint	colorLoc = glGetUniformLocation(shaderProg, "color");
+	GLint	outlineSizeLoc = glGetUniformLocation(shaderProg, "outlineSize");
+	GLint	outlineColorLoc = glGetUniformLocation(shaderProg, "outlineColor");
+	GLint	crossSizeLoc = glGetUniformLocation(shaderProg, "crossSize");
+	float	matrix[16];
+	
+	Mat4x4ToFloat(model, matrix);
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
+	glUniform4f(colorLoc, cross.color.r, cross.color.g, cross.color.b, cross.color.a);
+	glUniform1f(outlineSizeLoc, cross.outlineSize);
+	glUniform4f(outlineColorLoc, cross.outlineColor.r, cross.outlineColor.g, cross.outlineColor.b, cross.outlineColor.a);
+	glUniform2f(crossSizeLoc, cross.width, cross.height);
+    
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
+    glBindVertexArray(0);
 }
 
 void	DestroyShaderProgram(void *shaderProg)

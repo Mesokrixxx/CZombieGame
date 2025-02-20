@@ -83,13 +83,6 @@ typedef struct Color { f32	r, g, b, a; }	Color;
 #define CRIMSON    (Color){ 0.863f, 0.078f, 0.235f, 1.0f }
 #define PERU       (Color){ 0.804f, 0.522f, 0.247f, 1.0f }
 
-typedef struct {
-	f32		radius;
-	Color	color;
-	f32		outlineSize;
-	Color	outlineColor;
-}	CircleSprite;
-
 typedef enum {
 	PROJ_ORTHO,
 }	ProjType;

@@ -57,8 +57,9 @@ u32				CreateEntity(u32 flags);
 void			RemoveEntity(u32 entityID);
 
 // Graphics
-void			DrawCircle(Vec2 pos, CircleSprite *cicle);
-void			DrawRect(Vec2 pos, Vec2 size, Color c);
+void			DrawCircle(Vec2 pos, CircleSprite cicle);
+void			DrawRect(Vec2 pos, RectSprite rect);
+void			DrawCross(Vec2 pos, CrossSprite cross);
 Bool			RegisterVertexObject(VertexObject vo, u32 voID);
 GLuint			GetVAO(u32 voID);
 GLuint			GetVBO(u32 voID);
@@ -79,13 +80,17 @@ f32				LenghtVec2Squared(Vec2 v);
 f32				LenghtVec2(Vec2 v);
 Vec2			ScaleVec2(Vec2 v, f32 scale);
 Vec2			AddVec2s(Vec2 v1, Vec2 v2);
+Vec4			AddVec4s(Vec4 v1, Vec4 v2);
 Vec3			Vec3FromVec2(Vec2 v, f32 z);
 Vec4			Vec4FromVec2(Vec2 v, f32 z, f32 w);
 Vec4			Vec4FromVec3(Vec3 v, f32 w);
 void			Mat4x4ToFloat(Mat4x4 m, f32 *f);
+Mat4x4			Mat4x4MulMat4x4(Mat4x4 a, Mat4x4 b);
 Mat4x4			Mat4x4Identity();
 Mat4x4			Mat4x4Translation(Vec3 v);
 void			TranslateMat4x4(Mat4x4 *m, Vec3 v);
 void			ScaleMat4x4(Mat4x4 *m, Vec3 v);
+void			RotateMat4x4(Mat4x4 *m, f32 angle);
+f32				DegToRad(f32 deg);
 
 #endif

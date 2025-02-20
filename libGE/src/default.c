@@ -153,6 +153,13 @@ Bool	InitDefaultShaderProgram()
 	if (!AddToSparseSet(instance->shaderPrograms, &defaultRect, SHADERPROG_RECT_DEFAULT))
 		return (false);
 
+	GLuint defaultCross = CreateShaderProgram(
+		"libGE/src/res/shaders/defaultCross.vert",
+		"libGE/src/res/shaders/defaultCross.frag");
+	
+	if (!AddToSparseSet(instance->shaderPrograms, &defaultCross, SHADERPROG_CROSS_DEFAULT))
+		return (false);
+
 	return (true);
 }
 
@@ -163,10 +170,15 @@ Bool	InitDefaultVOs()
 	CreateCirleVAO(&circleVAO, &circleVBO, DEFAULT_CIRCLE_ROUNDNESS);
 	if (!RegisterVertexObject((VertexObject){ circleVAO, circleVBO }, CIRCLE_VO)) return (false);
 
-	GLuint	debugUIVAO, debugUIVBO;
+	GLuint	rectVAO, rectVBO;
 
-	CreateRectVAO(&debugUIVAO, &debugUIVBO);
-	if (!RegisterVertexObject((VertexObject){ debugUIVAO, debugUIVBO }, RECT_VO)) return (false);
+	CreateRectVAO(&rectVAO, &rectVBO);
+	if (!RegisterVertexObject((VertexObject){ rectVAO, rectVBO }, RECT_VO)) return (false);
+
+	GLuint	crossVAO, crossVBO;
+
+	CreateCrossVAO(&crossVAO, &crossVBO);
+	if (!RegisterVertexObject((VertexObject){ crossVAO, crossVBO }, CROSS_VO)) return (false);
 
 	return (true);
 }

@@ -83,29 +83,60 @@ void	RenderDUIWindow(DebugUIWindow *window)
 	iVec2	mousePos = GetMousePos();
 
 	// Zone principale (gris foncé)
-	DrawRect(*window->pos, (Vec2){ window->currWidth, window->currHeight }, (Color){ 0.25f, 0.25f, 0.25f, 0.85f });
+	RectSprite menuRect = {
+		.height = window->currHeight,
+		.width = window->currWidth,
+		.color = { 0.25f, 0.25f, 0.25f, 0.85f },
+		.outlineSize = 2.0f,
+		.outlineColor = BLACK
+	};
 
 	// Handler (bleu clair)
-	Vec2	handlerPos = { window->pos->x + window->currWidth - 10, window->pos->y + window->currHeight - 10 };
-	Vec2	handlerSize = { 10, 10 };
-	
-	Color	handlerColor = { 0.75f, 0.75f, 1.0f, 0.95f };
-	if (mousePos.x >= handlerPos.x && mousePos.x < handlerPos.x + handlerSize.x
-		&& mousePos.y >= handlerPos.y && mousePos.y < handlerPos.y + handlerSize.y)
-		handlerColor = (Color){ 0.80f, 0.80f, 1.0f, 0.95f };
+	RectSprite handlerRect = {
+		.height = 10,
+		.width = 10,
+		.color = { 0.45f, 0.45f, 0.75f, 0.45f },
+		.outlineSize = 1.0f,
+		.outlineColor = BLACK
+	};
 
-	DrawRect(handlerPos, handlerSize, handlerColor);
-	
 	// Header (bleu)
-	Vec2	headerPos = *window->pos;
-	Vec2	headerSize = { window->currWidth, MIN_DUI_WINDOW_HEIGT - 4 };
+	RectSprite headerRect = {
+		.height = MIN_DUI_WINDOW_HEIGT - 4,
+		.width = window->currWidth,
+		.color = { 0.25f, 0.25f, 0.85f, 0.95f },
+		.outlineSize = 2.0f,
+		.outlineColor = BLACK
+	};
 
-	Color	headerColor =  { 0.25f, 0.25f, 0.85f, 0.95f };
-	if (mousePos.x >= headerPos.x && mousePos.x < headerPos.x + headerSize.x
-		&& mousePos.y >= headerPos.y && mousePos.y < headerPos.y + headerSize.y)
-		headerColor =  (Color){ 0.30f, 0.30f, 0.90f, 0.95f };
+	// Croix de fermeture (rouge)
+	CrossSprite cross = {
+		.width = 8,
+		.height = 8,
+		.angle = DegToRad(45.0f),
+		.color = { 0.25f, 0.25f, 0.55f, 0.75f },
+		.outlineSize = 0.2f,
+		.outlineColor = BLACK
+	};
 
-	DrawRect(headerPos, headerSize, headerColor);
+	Vec2 headerPos = *window->pos;
+	Vec2 handlerPos = { window->pos->x + window->currWidth - 10, window->pos->y + window->currHeight - 10 };
+	Vec2 crossPos = { window->pos->x + window->currWidth - cross.width, window->pos->y + 8 };
+
+	if (mousePos.x >= handlerPos.x && mousePos.x < handlerPos.x + handlerRect.width
+		&& mousePos.y >= handlerPos.y && mousePos.y < handlerPos.y + handlerRect.height)
+		handlerRect.color = (Color){ 0.85f, 0.85f, 1.0f, 0.95f };
+	else if (mousePos.x >= crossPos.x - 5 && mousePos.x <= crossPos.x + cross.width + 5
+		&& mousePos.y >= crossPos.y - 5 && mousePos.y <= crossPos.y + cross.height + 5)
+		cross.color = (Color){ 1.0f, 0.3f, 0.3f, 1.0f };
+	else if (mousePos.x >= headerPos.x && mousePos.x < headerPos.x + headerRect.width
+		&& mousePos.y >= headerPos.y && mousePos.y < headerPos.y + headerRect.height)
+		headerRect.color = (Color){ 0.30f, 0.30f, 0.90f, 0.95f };
+	
+	DrawRect(*window->pos, menuRect);
+	DrawRect(handlerPos, handlerRect);
+	DrawRect(headerPos, headerRect);
+	DrawCross(crossPos, cross);
 }
 
 void	DestroyDUIComp(DebugUIComp *comp)
@@ -164,6 +195,16 @@ void	HandleDUIMouseDown(MouseEvent *mouse)
 					clickedWindow->resizeWindow = true;
 				}
 
+				// If clicking the X
+				else if (mouse->pos->x >= clickedWindow->pos->x + clickedWindow->currWidth - 20
+					&& mouse->pos->y >= clickedWindow->pos->y && mouse->pos->y < clickedWindow->pos->y + 20)
+				{
+					DestroyDUIWindow(clickedWindow);
+					clickedWindow = NULL;
+					instance->debugUI->windowCount--;
+					return ;
+				}
+
 				// If clicking the top part then moving
 				else if ((mouse->pos->x >= clickedWindow->pos->x && mouse->pos->x < clickedWindow->pos->x + clickedWindow->currWidth
 					&& mouse->pos->y >= clickedWindow->pos->y && mouse->pos->y < clickedWindow->pos->y + MIN_DUI_WINDOW_HEIGT))
@@ -188,7 +229,7 @@ void	HandleDUIMouseDown(MouseEvent *mouse)
 		}
 	}
 	
-	if (mouse->button == SDL_BUTTON_RIGHT && !justCreateWindow)
+	if (mouse->button == SDL_BUTTON_MIDDLE && !justCreateWindow)
 	{
 		DebugUIWindow *newWindow = CreateDUIWindow();
 		if (newWindow)

@@ -139,12 +139,20 @@ void	LaunchInstance()
 
 		u32			mouseState = SDL_GetMouseState(&mousePos.x, &mousePos.y);
 		static i8	leftButton = SDL_BUTTON_LEFT;
+		static i8	middleButton = SDL_BUTTON_MIDDLE;
 		static i8	rightButton = SDL_BUTTON_RIGHT;
 		
 		if (mouseState & SDL_BUTTON_LMASK)
 		{
 			MouseEvent	*evData = mouseButtonDownEvent->data;
 			evData->button = leftButton;
+			*evData->pos = mousePos;
+			PublishEvent(mouseButtonDownEvent);
+		}
+		if (mouseState & SDL_BUTTON_MMASK)
+		{
+			MouseEvent	*evData = mouseButtonDownEvent->data;
+			evData->button = middleButton;
 			*evData->pos = mousePos;
 			PublishEvent(mouseButtonDownEvent);
 		}
