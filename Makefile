@@ -19,7 +19,7 @@ else
         CC := cc
     endif
     LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 
-    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${LIB_DIR}/include
+    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${LIB_DIR}/src/include
 endif
 
 LIB_DIR = libGE
