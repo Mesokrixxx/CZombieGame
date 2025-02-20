@@ -27,9 +27,6 @@ OBJ = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-debug: CFLAGS += -DDEBUG
-debug: clean all
-
 $(NAME): $(OBJ)
 	ar crs $(NAME) $(OBJ)
 
@@ -38,4 +35,4 @@ clean:
 
 re: clean all
 
-.PHONY: all clean re debug
+.PHONY: all clean re

@@ -78,7 +78,9 @@ Event	*NewEvent(u32 evtp)
 		return ((void)LOG("Failed to allocate for a new event\n"), NULL);
 
 	e->type = et->typeID;
-	e->data = et->defaultCreator ? et->defaultCreator() : NULL;
+	e->data = NULL;
+	if (et->defaultCreator)
+		e->data = et->defaultCreator();
 	return (e);
 }
 

@@ -13,6 +13,11 @@ typedef enum {
 	DEFAULT_EVENT_TYPE_COUNT,
 }	EventTypeID;
 
+typedef struct {
+	i8		button;
+	iVec2	*pos;
+}	MouseEvent;
+
 # define EVENTTYPE_CHUNK_SIZE 24
 # define EVENTLISTENERS_CHUNK_SIZE 48
 

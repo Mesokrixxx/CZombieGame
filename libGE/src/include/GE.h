@@ -38,6 +38,7 @@ Instance		*CreateInstance(const char *title, u32 width, u32 height, ProjType pro
 void			LaunchInstance();
 void			SetInstanceBGCol(Color c);
 void			DestroyInstance();
+iVec2			GetMousePos();
 
 // Events
 Bool			RegisterEventType(u32 evtp, void *(*defaultCreator)(void), void (*defaultRemover)(void *));

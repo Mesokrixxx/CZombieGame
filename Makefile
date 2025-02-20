@@ -30,11 +30,6 @@ OBJ = $(SRCS:.c=.o)
 
 all: lib $(NAME)
 
-debug: clean lib_debug $(NAME)
-
-lib_debug: 
-	cd $(LIB_DIR) && make debug
-
 lib: 
 	cd $(LIB_DIR) && make
 
@@ -52,4 +47,4 @@ game:
 	rm -f $(NAME)
 	$(MAKE) $(NAME)
 
-.PHONY: all clean re
+.PHONY: all clean re lib game

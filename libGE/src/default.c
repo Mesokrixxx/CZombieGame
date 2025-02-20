@@ -15,6 +15,7 @@ Bool	InitDefaultContent()
 
 static void	*keyCreator(void);
 static void	*mouseclickCreator(void);
+static void	mouseClickRemover(void *data);
 static void	*scrollCreator(void);
 
 static void defaultEndInstance(void *);
@@ -27,8 +28,8 @@ Bool	InitDefaultEventType()
 {
 	if (!RegisterEventType(KEYDOWN_EVTP, keyCreator, NULL)) return (false);
 	if (!RegisterEventType(KEYUP_EVTP, keyCreator, NULL)) return (false);
-	if (!RegisterEventType(MOUSEDOWN_EVTP, mouseclickCreator, NULL)) return (false);
-	if (!RegisterEventType(MOUSEUP_EVTP, mouseclickCreator, NULL)) return (false);
+	if (!RegisterEventType(MOUSEDOWN_EVTP, mouseclickCreator, mouseClickRemover)) return (false);
+	if (!RegisterEventType(MOUSEUP_EVTP, mouseclickCreator, mouseClickRemover)) return (false);
 	if (!RegisterEventType(SCROLL_EVTP, scrollCreator, NULL)) return (false);
 	if (!RegisterEventType(QUIT_EVTP, NULL, NULL)) return (false);
 
@@ -47,12 +48,20 @@ static void	*keyCreator(void)
 
 static void	*mouseclickCreator(void)
 {
-	i8	button;
-	i8	*button_ptr;
+	MouseEvent	*button;
 
-	button = SDL_BUTTON_LEFT;
-	button_ptr = &button;
-	return (button_ptr);
+	button = _malloc(sizeof(MouseEvent));
+	button->button = SDL_BUTTON_LEFT;
+	button->pos = _malloc(sizeof(Vec2));
+	return (button);
+}
+
+static void	mouseClickRemover(void *data)
+{
+	MouseEvent	*evData = data;
+
+	_free(evData->pos);
+	_free(evData);
 }
 
 static void	*scrollCreator(void)
@@ -66,11 +75,18 @@ static void	*scrollCreator(void)
 	return (v_ptr);
 }
 
+static void testMouseListener(void *data)
+{
+	printf("Mouse move: %d %d\n", ((MouseEvent *)data)->pos->x, ((MouseEvent *)data)->pos->y);
+}
+
 Bool	InitDefaultEventListnerer()
 {
 	if (!NewEventListener(QUIT_EVTP, defaultEndInstance)) return (false);
 	if (!NewEventListener(KEYDOWN_EVTP, defaultKeyDownListener)) return (false);
 	if (!NewEventListener(KEYUP_EVTP, defaultKeyUpListener)) return (false);
+	if (!NewEventListener(MOUSEDOWN_EVTP, testMouseListener)) return (false);
+	if (!NewEventListener(MOUSEUP_EVTP, testMouseListener)) return (false);
 
 	return (true);
 }

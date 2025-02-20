@@ -18,17 +18,12 @@
 # include <SDL2/SDL.h>
 # include <GL/glew.h>
 
-# ifdef DEBUG
-#  define _malloc(size)	malloc_debug(size)
-#  define _free(ptr)	free_debug(ptr)
+# define _malloc(size)	malloc_debug(size)
+# define _free(ptr)	free_debug(ptr)
 
 void	*malloc_debug(size_t size);
 void	free_debug(void *ptr);
-
-# else
-#  define _malloc(size)	malloc(size)
-#  define _free(ptr)	free(ptr)
-# endif
+void	printAllocStats(void);
 
 # define PI	3.1415926f
 

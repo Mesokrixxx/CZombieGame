@@ -33,6 +33,8 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 		"Failed to create a glContext for new instance\n");
 
 	SDL_GL_SetSwapInterval(0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	ASSERT(glewInit() == GLEW_OK,
 		"Failed to init GLEW\n");
@@ -109,7 +111,8 @@ void	LaunchInstance()
 			}
 			else if (ev.type == SDL_MOUSEBUTTONUP)
 			{
-				mouseButtonUpEvent->data = &ev.button.button;
+				((MouseEvent *)mouseButtonUpEvent->data)->button = ev.button.button;
+				((MouseEvent *)mouseButtonUpEvent->data)->pos = &(iVec2){ ev.button.x, ev.button.y };
 				PublishEvent(mouseButtonUpEvent);
 			}
 			else if (ev.type == SDL_MOUSEWHEEL)
@@ -137,12 +140,16 @@ void	LaunchInstance()
 		
 		if (mouseState & SDL_BUTTON_LMASK)
 		{
-			mouseButtonDownEvent->data = &leftButton;
+			MouseEvent	*evData = mouseButtonDownEvent->data;
+			evData->button = leftButton;
+			evData->pos = &mousePos;
 			PublishEvent(mouseButtonDownEvent);
 		}
 		if (mouseState & SDL_BUTTON_RMASK)
 		{
-			mouseButtonDownEvent->data = &rightButton;
+			MouseEvent	*evData = mouseButtonDownEvent->data;
+			evData->button = rightButton;
+			evData->pos = &mousePos;
 			PublishEvent(mouseButtonDownEvent);
 		}
 
@@ -175,7 +182,6 @@ void	LaunchInstance()
 
 		CurrentFPS = 1.0f / GetDeltaTime();
 	}
-
 	DestroyEvent(keydownEvent);
 	DestroyEvent(keyupEvent);
 	DestroyEvent(mouseButtonDownEvent);
@@ -191,7 +197,6 @@ void	SetInstanceBGCol(Color c)
 
 void	DestroyInstance()
 {
-	DestroyEventBus(instance->eventBus);
 	DestroyECS(instance->entities);
 	_free(instance->projectionMatrice);
 	DestroySparseSet(instance->VOs);
@@ -199,8 +204,19 @@ void	DestroyInstance()
 	DestroySparseSet(instance->shaderPrograms);
 	_free(instance->shaderPrograms);
 	DestroyUIDebugger(instance->debugUI);
+	DestroyEventBus(instance->eventBus);
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);
 	SDL_Quit();
 	_free(instance);
+
+	printAllocStats();
+}
+
+iVec2	GetMousePos()
+{
+	iVec2	mousePos;
+	
+	SDL_GetMouseState(&mousePos.x, &mousePos.y);
+	return (mousePos);
 }
