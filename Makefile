@@ -18,7 +18,7 @@ else
         DETECTED_OS := Linux
         CC := cc
     endif
-    LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 
+    LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 -lGL
     CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${LIB_DIR}/src/include
 endif
 
