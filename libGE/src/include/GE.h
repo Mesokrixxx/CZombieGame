@@ -57,13 +57,15 @@ u32				CreateEntity(u32 flags);
 void			RemoveEntity(u32 entityID);
 
 // Graphics
-void			DrawCircle(Vec2 *pos, CircleSprite *cicle);
+void			DrawCircle(Vec2 pos, CircleSprite *cicle);
+void			DrawRect(Vec2 pos, Vec2 size, Color c);
 Bool			RegisterVertexObject(VertexObject vo, u32 voID);
 GLuint			GetVAO(u32 voID);
 GLuint			GetVBO(u32 voID);
 GLuint			CreateShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath);
 GLuint			GetShaderProgram(u32 shaderProgID);
 void			UseShader(GLuint shaderProg);
+void			BindVAO(u32 voID);
 
 // DebugUI
 DebugUIWindow	*CreateDUIWindow();

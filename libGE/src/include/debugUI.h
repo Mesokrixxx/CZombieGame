@@ -3,7 +3,7 @@
 
 # include "vars.h"
 
-# define MAX_DUI_WINDOWS		24
+# define MAX_DUI_WINDOWS		12
 # define MAX_COMP_DUI_WINDOWS	56
 
 # define MIN_DUI_WINDOW_WIDTH	112
@@ -11,7 +11,7 @@
 # define MAX_DUI_WINDOW_WIDTH	480
 # define MAX_DUI_WINDOW_HEIGHT	720
 
-typedef struct {
+typedef struct DebugUIComp {
 	union {
 		i32		*idata;
 		f32		*fdata;
@@ -25,17 +25,22 @@ typedef struct {
 
 void			DestroyDUIComp(DebugUIComp *comp);
 
-typedef struct {
+typedef struct DebugUIWindow {
+	u32			id;
+	
 	DebugUIComp	**comps;
 	u32			compCount;
-	Vec2		pos;
-	u32			currWidth;
-	u32			currHeight;
+	Vec2		*pos;
+
+	i32			currWidth;
+	i32			currHeight;
+	Bool		moveWindow;
+	Bool		resizeWindow;
 }	DebugUIWindow;
 
 void			DestroyDUIWindow(DebugUIWindow *window);
 
-typedef struct {
+typedef struct DebugUI {
 	DebugUIWindow	**windows;
 	u32				windowCount;
 }	DebugUI;
@@ -45,5 +50,8 @@ void			DestroyUIDebugger(DebugUI *debugUI);
 
 void			RenderDebugUI(DebugUI *debugUI);
 void			RenderDUIWindow(DebugUIWindow *window);
+DebugUIWindow	*GetDUIWindow(iVec2 pos);
+void			HandleDUIMouseDown(MouseEvent *mouse);
+void			HandleDUIMouseUp(MouseEvent *mouse);
 
 #endif

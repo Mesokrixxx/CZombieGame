@@ -3,6 +3,7 @@
 extern Instance	*instance;
 
 GLuint	lastShaderProg;
+GLuint	lastVAO;
 
 Bool	RegisterVertexObject(VertexObject vo, u32 voID)
 {
@@ -43,6 +44,18 @@ void		UseShader(GLuint shaderProg)
 	{
 		glUseProgram(shaderProg);
 		lastShaderProg = shaderProg;
+		firstUse = false;
+	}
+}
+
+void		BindVAO(u32 voID)
+{
+	static Bool	firstUse = true;
+	
+	if (firstUse || voID != lastVAO)
+	{
+		glBindVertexArray(GetVAO(voID));
+		lastVAO = voID;
 		firstUse = false;
 	}
 }
@@ -207,16 +220,16 @@ void	CreateRectVAO(GLuint *vao, GLuint *vbo)
 	glBindVertexArray(0);
 }
 
-void		DrawCircle(Vec2 *pos, CircleSprite *circle)
+void		DrawCircle(Vec2 pos, CircleSprite *circle)
 {
 	GLuint	shaderProg = GetShaderProgram(SHADERPROG_CIRCLE_DEFAULT);
 	
 	UseShader(shaderProg);
 
-	glBindVertexArray(GetVAO(CIRCLE_VO));
+	BindVAO(CIRCLE_VO);
 	
 	Mat4x4	model = Mat4x4Identity();
-	TranslateMat4x4(&model, Vec3FromVec2(*pos, 0));
+	TranslateMat4x4(&model, Vec3FromVec2(pos, 0));
 	ScaleMat4x4(&model, (Vec3){ circle->radius, circle->radius, 1 });
 
 	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
@@ -233,8 +246,28 @@ void		DrawCircle(Vec2 *pos, CircleSprite *circle)
 	glUniform4f(outlineColorLoc, circle->outlineColor.r, circle->outlineColor.g,
 		circle->outlineColor.b, circle->outlineColor.a);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, DEFAULT_CIRCLE_ROUNDNESS);
+}
 
-	glBindVertexArray(0);
+void	DrawRect(Vec2 pos, Vec2 size, Color c)
+{
+	GLuint	shaderProg = GetShaderProgram(SHADERPROG_RECT_DEFAULT);
+
+	UseShader(shaderProg);
+
+	BindVAO(RECT_VO);
+
+	Mat4x4	model = Mat4x4Identity();
+	TranslateMat4x4(&model, Vec3FromVec2(pos, 0));
+	ScaleMat4x4(&model, (Vec3){ size.x, size.y, 1 });
+
+	GLint	modelLoc = glGetUniformLocation(shaderProg, "model");
+	GLint	colorLoc = glGetUniformLocation(shaderProg, "color");
+	float	matrix[16];
+	
+	Mat4x4ToFloat(model, matrix);
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matrix);
+	glUniform4f(colorLoc, c.r, c.g, c.b, c.a);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void	DestroyShaderProgram(void *shaderProg)

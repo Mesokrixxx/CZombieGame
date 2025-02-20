@@ -4,6 +4,8 @@ f32			AimedFPS = 60;
 f32			CurrentFPS;
 Instance	*instance;
 
+iVec2		mousePos;
+
 Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType projType)
 {	
 	instance = _malloc(sizeof(Instance));
@@ -111,8 +113,10 @@ void	LaunchInstance()
 			}
 			else if (ev.type == SDL_MOUSEBUTTONUP)
 			{
-				((MouseEvent *)mouseButtonUpEvent->data)->button = ev.button.button;
-				((MouseEvent *)mouseButtonUpEvent->data)->pos = &(iVec2){ ev.button.x, ev.button.y };
+				MouseEvent	*meData = mouseButtonUpEvent->data;
+				meData->button = ev.button.button;
+				meData->pos->x = ev.button.x;
+				meData->pos->y = ev.button.y;
 				PublishEvent(mouseButtonUpEvent);
 			}
 			else if (ev.type == SDL_MOUSEWHEEL)
@@ -133,7 +137,6 @@ void	LaunchInstance()
 			}	
 		}
 
-		iVec2		mousePos;
 		u32			mouseState = SDL_GetMouseState(&mousePos.x, &mousePos.y);
 		static i8	leftButton = SDL_BUTTON_LEFT;
 		static i8	rightButton = SDL_BUTTON_RIGHT;
@@ -142,14 +145,14 @@ void	LaunchInstance()
 		{
 			MouseEvent	*evData = mouseButtonDownEvent->data;
 			evData->button = leftButton;
-			evData->pos = &mousePos;
+			*evData->pos = mousePos;
 			PublishEvent(mouseButtonDownEvent);
 		}
 		if (mouseState & SDL_BUTTON_RMASK)
 		{
 			MouseEvent	*evData = mouseButtonDownEvent->data;
 			evData->button = rightButton;
-			evData->pos = &mousePos;
+			*evData->pos = mousePos;
 			PublishEvent(mouseButtonDownEvent);
 		}
 
@@ -215,8 +218,5 @@ void	DestroyInstance()
 
 iVec2	GetMousePos()
 {
-	iVec2	mousePos;
-	
-	SDL_GetMouseState(&mousePos.x, &mousePos.y);
 	return (mousePos);
 }

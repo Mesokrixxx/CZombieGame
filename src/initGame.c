@@ -82,5 +82,5 @@ static void	drawCircleSprite(u32 entityID, f32 dt)
 	CircleSprite	*bodyParams = GetComponent(CIRCLE_SPRITE_CMP, entityID);
 	
 	(void)dt;
-	DrawCircle(entityPos, bodyParams);
+	DrawCircle(*entityPos, bodyParams);
 }
