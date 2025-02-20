@@ -14,6 +14,7 @@ typedef enum {
 }	EventTypeID;
 
 # define EVENTTYPE_CHUNK_SIZE 24
+# define EVENTLISTENERS_CHUNK_SIZE 48
 
 typedef struct EventType {
 	u32		typeID;
@@ -24,12 +25,16 @@ typedef struct EventType {
 EventType	*GetEventType(u32 evtp);
 
 typedef struct EventListener{
-	u32						typeID;
-	void					(*callback)(void *data);
-	struct EventListener	*next;
+	void	(*callback)(void *data);
 }	EventListener;
 
-void	DestroyEventBus(EventListener *eb);
+typedef struct EventBus {
+	SparseSet	*listeners;
+	SparseSet	*eventTypes;
+}	EventBus;
+
+EventBus	*CreateEventBus();
+void		DestroyEventBus(EventBus *eb);
 
 typedef struct Event {
 	u32		type;

@@ -50,15 +50,10 @@ Instance	*CreateInstance(const char *title, u32 width, u32 height, ProjType proj
 	ASSERT(instance->projectionMatrice,
 		"Failed to allocate for projection matrice \n");
 	Mat4x4ToFloat(CreateProjectionMatrice(projType), instance->projectionMatrice);
-
-	instance->eventTypeRegistry = _malloc(sizeof(SparseSet));
-	ASSERT(instance->eventTypeRegistry,
-		"Failed to create event type registry for new instance\n");
-
-	ASSERT(CreateSparseSet(instance->eventTypeRegistry, sizeof(EventType), EVENTTYPE_CHUNK_SIZE, NULL, NULL),
-		"Failed to create sparse set of eventTypeRegistry\n");
 			
-	instance->eventBus = NULL;
+	instance->eventBus = CreateEventBus();
+	ASSERT(instance->eventBus,
+		"Failed to create event bus\n");
 
 	instance->entities = CreateECS();
 	ASSERT(instance->entities,
@@ -196,8 +191,6 @@ void	SetInstanceBGCol(Color c)
 
 void	DestroyInstance()
 {
-	DestroySparseSet(instance->eventTypeRegistry);
-	_free(instance->eventTypeRegistry);
 	DestroyEventBus(instance->eventBus);
 	DestroyECS(instance->entities);
 	_free(instance->projectionMatrice);

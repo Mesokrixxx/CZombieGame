@@ -2,20 +2,39 @@
 
 extern Instance	*instance;
 
-void	DestroyEventBus(EventListener *eb)
+EventBus	*CreateEventBus()
 {
-	EventListener	*temp;
+	EventBus	*eb;
 
+	eb = _malloc(sizeof(EventBus));
 	if (!eb)
-		return ((void)LOG("Tried to destroy NULL event bus\n"));
+		return ((void)LOG("Failed to allocate for event bus\n"), NULL);
+	
+	eb->eventTypes = _malloc(sizeof(SparseSet));
+	if (!eb->eventTypes)
+		return ((void)LOG("Failed to allocate for event types in event bus\n"),
+			_free(eb), NULL);
+	if (!CreateSparseSet(eb->eventTypes, sizeof(EventType), EVENTTYPE_CHUNK_SIZE, NULL, NULL))
+		return ((void)LOG("Failed to create sparseset for event types in event bus\n"),
+			_free(eb->eventTypes), _free(eb), NULL);
 
-	temp = eb->next;
-	while (temp)
-	{
-		_free(eb);
-		eb = temp;
-		temp = eb->next;
-	}
+	eb->listeners = _malloc(sizeof(SparseSet));
+	if (!eb->listeners)
+		return ((void)LOG("Failed to allocate for event listeners in event bus\n"),
+			DestroySparseSet(eb->eventTypes), _free(eb), NULL);
+	if (!CreateSparseSet(eb->listeners, sizeof(SparseSet), EVENTLISTENERS_CHUNK_SIZE, NULL, DestroySparseSet))
+		return ((void)LOG("Failed to create sparseset for event listeners in event bus\n"),
+			DestroySparseSet(eb->eventTypes), _free(eb->eventTypes), _free(eb), NULL);
+
+	return (eb);
+}
+
+void	DestroyEventBus(EventBus *eb)
+{
+	DestroySparseSet(eb->listeners);
+	_free(eb->listeners);
+	DestroySparseSet(eb->eventTypes);
+	_free(eb->eventTypes);
 	_free(eb);
 }
 
@@ -23,16 +42,24 @@ Bool	RegisterEventType(u32 evtp, void *(*defaultCreator)(void), void (*defaultRe
 {
 	EventType	et;
 
-	if (!instance || !instance->eventTypeRegistry)
+	if (!instance || !instance->eventBus || !instance->eventBus->eventTypes)
 		return ((void)LOG("Can't create a new event type: instance not yet created\n"), false);
 
 	et.defaultCreator = defaultCreator;
 	et.defaultRemover = defaultRemover;
 
 	et.typeID = evtp;
-	if (!AddToSparseSet(instance->eventTypeRegistry, &et, et.typeID))
+	if (!AddToSparseSet(instance->eventBus->eventTypes, &et, et.typeID))
 		return ((void)LOG("Failed to register a new event type: failure when adding it to the registry\n"),
 			false);
+		
+	SparseSet	ss;
+
+	if (!CreateSparseSet(&ss, sizeof(EventListener), EVENTLISTENERS_CHUNK_SIZE, NULL, NULL))
+		return ((void)LOG("Failed to create sparseset for event listeners\n"), false);
+	if (!AddToSparseSet(instance->eventBus->listeners, &ss, et.typeID))
+		return ((void)LOG("Failed to register a new event type: failure when adding it to the registry\n"),
+			DestroySparseSet(&ss), false);
 
 	return (true);
 }
@@ -73,53 +100,44 @@ void	DestroyEvent(Event *e)
 
 Bool	NewEventListener(u32 evtp, void (*callback)(void *data))
 {
-	EventListener	*el;
+	EventListener	el;
 	EventType		*et;
+	SparseSet		*ss;
 
 	et = GetEventType(evtp);
 	if (!et)
 		return ((void)LOG("Failed to create event listnener, event type not found\n"), false);
 	
-	el = _malloc(sizeof(EventListener));
-	if (!el)
-		return ((void)LOG("Failed to allocate for new event listener\n"), false);
-	el->typeID = et->typeID;
-	el->callback = callback;	
-	el->next = NULL;
-
-	if (!instance->eventBus)
-		instance->eventBus = el;
-	else
-	{
-		EventListener	*temp;
-
-		temp = instance->eventBus->next;
-		instance->eventBus->next = el;
-		el->next = temp;
-	}
+	el.callback = callback;
+	ss = instance->eventBus->listeners->comp[instance->eventBus->listeners->sparse[et->typeID]];
+	if (!AddToSparseSet(ss, &el, ss->count))
+		return ((void)LOG("Failed to create event listnener, failure when adding it to the registry\n"),
+			false);
+	
 	return (true);
 }
 
 void	PublishEvent(Event *e)
 {
-	EventListener	*eb;
+	SparseSet	*ss;
 	
 	if (!e)
 		return ((void)LOG("Failed to publish NULL event\n"));
 
-	eb = instance->eventBus;
-	while (eb)
+	ss = instance->eventBus->listeners->comp[instance->eventBus->listeners->sparse[e->type]];
+	for (u32 i = 0; i < ss->count; i++)
 	{
-		if (eb->typeID == e->type && eb->callback)
-			eb->callback(e->data);
-		eb = eb->next;
-	}
+		EventListener	*el = ss->comp[i];
+
+		if (el->callback)
+			el->callback(e->data);
+	}		
 }
 
 EventType	*GetEventType(u32 evtp)
 {	
 	SparseSet	*ss;
 
-	ss = instance->eventTypeRegistry;
+	ss = instance->eventBus->eventTypes;
 	return (ss->comp[ss->sparse[evtp]]);
 }

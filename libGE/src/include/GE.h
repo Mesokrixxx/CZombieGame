@@ -18,8 +18,7 @@ typedef struct Instance {
 		i32	h;
 	}	windowParam;
 
-	SparseSet		*eventTypeRegistry;
-	EventListener	*eventBus;
+	EventBus		*eventBus;
 	
 	ECS				*entities;
 	
