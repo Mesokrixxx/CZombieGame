@@ -5,7 +5,7 @@ ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
     CC := cc
     DEFAULT_LIB_DIR = C:/w64devkit
-    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${DEFAULT_LIB_DIR}/include
+    CFLAGS = -I$(INCLUDE_DIR) -I${DEFAULT_LIB_DIR}/include
     LFLAGS = -lmingw32 -lglew32 -lopengl32 -lSDL2main -lSDL2
 else
     UNAME_S := $(shell uname -s)
@@ -18,7 +18,7 @@ else
         CC := cc
     endif
     LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 
-    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR)
+    CFLAGS = -I$(INCLUDE_DIR)
 endif
 
 INCLUDE_DIR = src/include/

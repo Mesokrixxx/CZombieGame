@@ -6,7 +6,7 @@ ifeq ($(OS),Windows_NT)
     NAME := $(NAME).exe
     CC := cc
     DEFAULT_LIB_DIR = C:/w64devkit
-    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(DEFAULT_LIB_DIR)/include
+    CFLAGS = -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(DEFAULT_LIB_DIR)/include
     LFLAGS = -lmingw32 -L$(LIB_DIR) -lGE -lglew32 -lopengl32 -lSDL2main -lSDL2
 else
     UNAME_S := $(shell uname -s)
@@ -19,7 +19,7 @@ else
         CC := cc
     endif
     LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 -lGL
-    CFLAGS = -Wall -Werror -Wextra -I$(INCLUDE_DIR) -I${LIB_DIR}/src/include
+    CFLAGS = -I$(INCLUDE_DIR) -I${LIB_DIR}/src/include
 endif
 
 LIB_DIR = libGE
@@ -28,7 +28,7 @@ INCLUDE_DIR = src/include/
 SRCS = $(wildcard src/*.c src/**/*.c)
 OBJ = $(SRCS:.c=.o)
 
-all: lib $(NAME)
+all: lib game
 
 lib: 
 	cd $(LIB_DIR) && make
