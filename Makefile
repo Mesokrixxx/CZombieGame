@@ -6,7 +6,7 @@ ifeq ($(OS),Windows_NT)
     NAME := $(NAME).exe
     CC := cc
     DEFAULT_LIB_DIR = C:/w64devkit
-    CFLAGS = -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(DEFAULT_LIB_DIR)/include
+    CFLAGS = -I$(INCLUDE_DIR) -I$(LIB_DIR)/src/include -I$(DEFAULT_LIB_DIR)/include -g3
     LFLAGS = -lmingw32 -L$(LIB_DIR) -lGE -lglew32 -lopengl32 -lSDL2main -lSDL2
 else
     UNAME_S := $(shell uname -s)
@@ -19,7 +19,7 @@ else
         CC := cc
     endif
     LFLAGS = -L$(LIB_DIR) -lGE -lGLEW -lSDL2 -lGL
-    CFLAGS = -I$(INCLUDE_DIR) -I${LIB_DIR}/src/include
+    CFLAGS = -I$(INCLUDE_DIR) -I${LIB_DIR}/src/include -g
 endif
 
 LIB_DIR = libGE

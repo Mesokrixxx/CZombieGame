@@ -9,23 +9,23 @@ bool	GECreateECS(GEECS *ecs)
 
 	ecs->entities = _malloc(sizeof(GESparseSet));
 	if (!ecs->entities)
-		return (0);
+		return (false);
 	if (!GECreateSparseSet(ecs->entities, sizeof(u32), GE_ENTITY_CHUNK_SIZE, NULL, NULL))
-		return (_free(ecs->entities), 0);
+		return (_free(ecs->entities), false);
 
 	ecs->systems = _malloc(sizeof(GESparseSet));
 	if (!ecs->systems)
-		return (_clearSS(ecs->entities), 0);
+		return (_clearSS(ecs->entities), false);
 	if (!GECreateSparseSet(ecs->systems, sizeof(GESystem), GE_SYSTEM_CHUNK_SIZE, NULL, NULL))
-		return (_clearSS(ecs->entities), _free(ecs->systems), 0);
+		return (_clearSS(ecs->entities), _free(ecs->systems), false);
 
 	ecs->components = _malloc(sizeof(GESparseSet));
 	if (!ecs->components)
-		return (_clearSS(ecs->systems), _clearSS(ecs->entities), 0);
+		return (_clearSS(ecs->systems), _clearSS(ecs->entities), false);
 	if (!GECreateSparseSet(ecs->components, sizeof(GESparseSet), GE_COMPS_CHUNK_SIZE, NULL, _clearSS))
-		return (_clearSS(ecs->entities), _clearSS(ecs->systems), _free(ecs->components), 0);
+		return (_clearSS(ecs->entities), _clearSS(ecs->systems), _free(ecs->components), false);
 
-	return (1);
+	return (true);
 }
 
 bool	GERegisterComponent(GEECS *ecs, GEComponent comp)
@@ -39,7 +39,7 @@ bool	GERegisterComponent(GEECS *ecs, GEComponent comp)
 		"Trying to register a comp but comp's flag already exist\n");
 
 	if (!GECreateSparseSet(&ss, comp.compSize, GE_ENTITY_CHUNK_SIZE, comp.defaultCreator, comp.defaultRemover))
-		return (0);
+		return (false);
 
 	return (GEAddToSparseSet(ecs->components, &ss, comp.compID));
 }
@@ -48,11 +48,14 @@ bool	GERegisterSystem(GEECS *ecs, GESystem system)
 {
 	ASSERT(ecs,
 		"Trying to register a system to a NULL ecs\n");
+
+	ASSERT(system.action,
+		"Cannot register a system with NULL action\n");
 	
 	return (GEAddToSparseSet(ecs->systems, &system, ecs->systems->count));
 }
 
-u32		GECreateEntity(GEECS *ecs, u32 flags)
+u32	GECreateEntity(GEECS *ecs, u32 flags)
 {
 	u32	entityID;
 

@@ -5,6 +5,9 @@
 # define GE_SYSTEM_CHUNK_SIZE 48
 # define GE_COMPS_CHUNK_SIZE 24
 
+# define GE_EVENT_LISTENERS_CHUNK_SIZE 24
+# define GE_EVENTTYPE_CHUNK_SIZE 12
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <stdint.h>
@@ -37,5 +40,10 @@ typedef struct { i32 x, y, z; }		iVec3;
 # define GE_COLOR_RED	(Color){ 1.0, 0.0, 0.0, 1.0 };
 # define GE_COLOR_BLUE	(Color){ 0.0, 1.0, 0.0, 1.0 };
 # define GE_COLOR_GREEN	(Color){ 0.0, 0.0, 1.0, 1.0 };
+
+typedef struct {
+	i8		button;
+	iVec2	pos;
+}	MouseEvent;
 
 #endif

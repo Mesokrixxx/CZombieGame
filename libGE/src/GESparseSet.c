@@ -15,20 +15,20 @@ bool	GECreateSparseSet(GESparseSet *ss, size_t compSize, size_t chunkSize, void 
 
 	ss->dense = _malloc(sizeof(u32) * chunkSize);
 	if (!ss->dense)
-		return (0);
+		return (false);
 	memset(ss->dense, UINT32_MAX, chunkSize * sizeof(u32));
 
 	ss->sparse = _malloc(sizeof(u32) * chunkSize);
 	if (!ss->sparse)
-		return (_free(ss->dense), 0);
+		return (_free(ss->dense), false);
 	memset(ss->sparse, UINT32_MAX, chunkSize * sizeof(u32));
 
 	ss->comp = _malloc(chunkSize * compSize);
 	if (!ss->comp)
-		return (_free(ss->dense), _free(ss->sparse), 0);
+		return (_free(ss->dense), _free(ss->sparse), false);
 	memset(ss->comp, 0, chunkSize * compSize);
 	
-	return (1);
+	return (true);
 }
 
 bool	GEAddToSparseSet(GESparseSet *ss, void *comp, u32 id)
@@ -40,14 +40,14 @@ bool	GEAddToSparseSet(GESparseSet *ss, void *comp, u32 id)
 		"Trying to add a NULL comp with a NULL defaultCreator to a sparse set\n")
 
 	if(ss->sparse[id] != UINT32_MAX)
-		return (1); // Content already exist, we can just override it
+		return (true); // Content already exist, we can just override it
 
 	if (ss->count > 0 && ss->count % ss->chunkSize == 0)
 	{
 		if (!_resizeSS(ss))
 		{
 			printf("Failed to resize sparse set\n");
-			return (0);
+			return (false);
 		}
 	}
 
@@ -55,13 +55,13 @@ bool	GEAddToSparseSet(GESparseSet *ss, void *comp, u32 id)
 
 	ss->comp[ss->count] = _malloc(ss->compSize);
 	if (!ss->comp[ss->count])
-		return (0);
+		return (false);
 	memcpy(ss->comp[ss->count], comp, ss->compSize);
 	
 	ss->dense[ss->count] = id;
 	ss->sparse[id] = ss->count;
 	ss->count++;
-	return (1);
+	return (true);
 }
 
 void	GERemoveFromSparseSet(GESparseSet *ss, u32 id)
@@ -135,22 +135,22 @@ static bool	_resizeSS(GESparseSet *ss)
 		ss->count * sizeof(u32), 
 		(ss->count + ss->chunkSize) * sizeof(u32), ss->dense);
 	if (!tempDenseRealloc)
-		return (0);
+		return (false);
 
 	tempSparseRealloc = _realloc(
 		ss->count * sizeof(u32),
 		(ss->count + ss->chunkSize) * sizeof(u32), ss->sparse);
 	if (!tempSparseRealloc)
-		return (0);
+		return (false);
 
 	tempCompRealloc = _realloc(
 		ss->count * ss->compSize,
 		(ss->count + ss->chunkSize) * ss->compSize, ss->comp);
 	if (!tempCompRealloc)
-		return (0);
+		return (false);
 
 	ss->dense = tempDenseRealloc;
 	ss->sparse = tempSparseRealloc;
 	ss->comp = tempCompRealloc;
-	return (1);
+	return (true);
 }

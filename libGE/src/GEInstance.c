@@ -1,5 +1,8 @@
 #include "GEPrivate.h"
 
+f32	aimedFPS = 60;
+f32	currentFPS = 0;
+
 void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjection projection)
 {
 	if (!instance)
@@ -39,6 +42,10 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 	ASSERT(instance->ecs && GECreateECS(instance->ecs),
 		"Failed to create ECS\n");
 
+	instance->eventBus = _malloc(sizeof(GEEventBus));
+	ASSERT(instance->eventBus && GECreateEventBus(instance->eventBus),
+		"Failed to create event bus\n");
+
 	instance->size = size;
 	instance->bgColor = GE_COLOR_WHITE;
 }
@@ -46,6 +53,7 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 void	GELaunchInstance(GEInstance *instance)
 {
 	SDL_Event	ev;
+	f32			deltaTime;	
 
 	if (!instance)
 		return ;
@@ -63,7 +71,26 @@ void	GELaunchInstance(GEInstance *instance)
 			instance->bgColor.b, instance->bgColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		for (u32 i = 0; i < instance->ecs->systems->count; i++)
+		{
+			GESystem	*system = instance->ecs->systems->comp[i];
+		
+			for (u32 j = 0; j < instance->ecs->entities->count; j++)
+			{
+				u32	*flags = instance->ecs->entities->comp[j];
+
+				if ((*flags & system->requiredFlags) == system->requiredFlags)
+					system->action(instance->ecs, instance->ecs->entities->sparse[j]);
+			}
+		}
+
 		SDL_GL_SwapWindow(instance->window);
+
+		GEUpdateDTAndCapFPS(aimedFPS);
+		deltaTime = GEGetDeltaTime();
+
+		if (instance->debugMode)
+			currentFPS = 1.0f / deltaTime;
 	}
 }
 
@@ -74,6 +101,9 @@ void	GEDestroyInstance(GEInstance *instance)
 
 	GEDestroyECS(instance->ecs);
 	_free(instance->ecs);
+
+	GEDestroyEventBus(instance->eventBus);
+	_free(instance->eventBus);
 
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);

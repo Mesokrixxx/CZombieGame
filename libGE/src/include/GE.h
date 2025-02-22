@@ -2,16 +2,20 @@
 # define GAME_ENGINE_H
 
 # include "GEVars.h"
+# include "GETime.h"
 # include "GEMath.h"
 # include "GESparseSet.h"
 # include "GEECS.h"
+# include "GEEventBus.h"
 
 typedef struct {
 	SDL_Window		*window;
 	SDL_GLContext	glContext;
 	GEECS			*ecs;
+	GEEventBus		*eventBus;
 	Color			bgColor;
 	iVec2			size;
+	bool			debugMode;
 	bool			running;
 }	GEInstance;
 
