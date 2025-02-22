@@ -7,6 +7,7 @@
 # include "GESparseSet.h"
 # include "GEECS.h"
 # include "GEEventBus.h"
+# include "GEGraphics.h"
 
 typedef struct GEInstance {
 	SDL_Window		*window;

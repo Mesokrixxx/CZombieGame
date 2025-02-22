@@ -1,12 +1,18 @@
 #ifndef GAME_ENGINE_VARS_H
 # define GAME_ENGINE_VARS_H
 
+// ECS
 # define GE_ENTITY_CHUNK_SIZE 256
 # define GE_SYSTEM_CHUNK_SIZE 48
 # define GE_COMPS_CHUNK_SIZE 24
 
+// EVENTBUS
 # define GE_EVENT_LISTENERS_CHUNK_SIZE 24
 # define GE_EVENTTYPE_CHUNK_SIZE 12
+
+// GRAPHICS
+# define GE_VOS_CHUNK_SIZE 24
+# define GE_SHADERPROGS_CHUNK_SIZE 24
 
 # include <stdio.h>
 # include <stdlib.h>
