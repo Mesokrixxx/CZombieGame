@@ -25,12 +25,19 @@ void	GEDestroyVO(void *vVO)
 	glDeleteBuffers(1, &VO->VBO);
 }
 
-bool	GEInitGraphics(GEGraphics *graphics, GEProjection proj)
+void	GEDestroyShader(void *sshader)
+{
+	GLuint	shader = *(GLuint *)sshader;
+
+	glDeleteProgram(shader);
+}
+
+bool	GEInitGraphics(GEGraphics *graphics, iVec2 size, GEProjection proj)
 {
 	ASSERT(graphics,
 		"Trying to init graphics for instance but given one is NULL\n");
 
-	GEMat4x4ToFloat(graphics->projectionMatrice, GECreateProjectionMatrice(proj));
+	GEMat4x4ToFloat(graphics->projectionMatrice, GECreateProjectionMatrice(size, proj));
 
 	graphics->VOs = _malloc(sizeof(GESparseSet));
 	if (!graphics->VOs)
@@ -41,7 +48,7 @@ bool	GEInitGraphics(GEGraphics *graphics, GEProjection proj)
 	graphics->shaders = _malloc(sizeof(GESparseSet));
 	if (!graphics->shaders)
 		return (false);
-	if (!GECreateSparseSet(graphics->shaders, sizeof(GLuint), GE_SHADERPROGS_CHUNK_SIZE, NULL, GEDestroyVO))
+	if (!GECreateSparseSet(graphics->shaders, sizeof(GLuint), GE_SHADERPROGS_CHUNK_SIZE, NULL, GEDestroyShader))
 		return (_clearSS(graphics->VOs), _free(graphics->shaders), false);
 	
 	return (true);
@@ -109,7 +116,13 @@ void	GEUseVAO(GEGraphics *graphics, u32 voID)
 
 void	GEDestroyGraphics(GEGraphics *graphics)
 {
+	ASSERT(graphics,
+		"Trying to destroy NULL graphics\n");
 
+	GEDestroySparseSet(graphics->VOs);
+	_free(graphics->VOs);
+	GEDestroySparseSet(graphics->shaders);
+	_free(graphics->shaders);
 }
 
 static bool	_createShaderProgram(GEGraphics *graphics, GLuint *shaderProg, const char *vertPath, const char *fragPath)

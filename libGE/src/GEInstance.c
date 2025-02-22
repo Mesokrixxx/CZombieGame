@@ -53,6 +53,10 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 	ASSERT(instance->eventBus && GECreateEventBus(instance->eventBus),
 		"Failed to create event bus\n");
 
+	instance->graphics = _malloc(sizeof(GEGraphics));
+	ASSERT(instance->graphics && GEInitGraphics(instance->graphics, instance->size, projection),
+		"Failed to create graphics for instance\n");
+
 	instance->size = size;
 	instance->bgColor = GE_COLOR_WHITE;
 	instance->quitMethod = _defaultQuitMethod;
@@ -191,6 +195,9 @@ void	GEDestroyInstance(GEInstance *instance)
 
 	GEDestroyEventBus(instance->eventBus);
 	_free(instance->eventBus);
+
+	GEDestroyGraphics(instance->graphics);
+	_free(instance->graphics);
 
 	SDL_GL_DeleteContext(instance->glContext);
 	SDL_DestroyWindow(instance->window);

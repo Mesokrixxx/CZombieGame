@@ -14,6 +14,7 @@ typedef struct GEInstance {
 	SDL_GLContext	glContext;
 	GEECS			*ecs;
 	GEEventBus		*eventBus;
+	GEGraphics		*graphics;
 
 	Color			bgColor;
 	iVec2			size;

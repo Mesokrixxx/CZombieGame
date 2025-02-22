@@ -11,6 +11,7 @@ typedef struct {
 
 GEVertexObject	GECreateVertexObject(GLuint VAO, GLuint VBO);
 void			GEDestroyVO(void *vVO);
+void			GEDestroyShader(void *sshader);
 
 typedef struct {
 	GESparseSet	*VOs;
@@ -18,7 +19,7 @@ typedef struct {
 	float		projectionMatrice[16];
 }	GEGraphics;
 
-bool			GEInitGraphics(GEGraphics *graphics, GEProjection proj);
+bool			GEInitGraphics(GEGraphics *graphics, iVec2 size, GEProjection proj);
 bool			GERegisterShaderProgram(GEGraphics *graphics, const char *vertexFilePath, const char *fragFilePath, u32 shaderID);
 bool			GERegisterVO(GEGraphics *graphics, GEVertexObject *vo, u32 voID);
 void			GEUseShader(GEGraphics *graphics, u32 shaderID);
