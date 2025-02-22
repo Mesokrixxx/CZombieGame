@@ -25,7 +25,7 @@ bool	GECreateEventBus(GEEventBus *eventBus)
 	eventBus->listeners = _malloc(sizeof(GESparseSet));
 	if (!eventBus->listeners)
 		return (false);
-	if (!GECreateSparseSet(eventBus->listeners, sizeof(GEEventListener), GE_EVENTTYPE_CHUNK_SIZE, NULL, _clearSS))
+	if (!GECreateSparseSet(eventBus->listeners, sizeof(GESparseSet), GE_EVENTTYPE_CHUNK_SIZE, NULL, _clearSS))
 		return (_free(eventBus->listeners), false);
 
 	defaultContent =
@@ -116,11 +116,6 @@ static void *_defaultMouseclickCreator()
 	mouse->pos = (iVec2){ 0 };
 	mouse->button = SDL_BUTTON_LEFT;
 	return (mouse);
-}
-
-static void	_defaultMouseclickRemover(void *data)
-{
-	_free(data);
 }
 
 static void *_defaultScancodeCreator()
