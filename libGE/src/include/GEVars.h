@@ -40,6 +40,9 @@ typedef struct { f32 x, y; }		Vec2;
 typedef struct { i32 x, y; }		iVec2;
 typedef struct { f32 x, y, z; }		Vec3;
 typedef struct { i32 x, y, z; }		iVec3;
+typedef struct { f32 x, y, z, w; }	Vec4;
+typedef struct { i32 x, y, z, w; }	iVec4;
+typedef struct { Vec4 a, b, c, d; }	Mat4x4;
 
 # define GE_COLOR_WHITE	(Color){ 1.0, 1.0, 1.0, 1.0 };
 # define GE_COLOR_BLACK	(Color){ 0.0, 0.0, 0.0, 1.0 };
