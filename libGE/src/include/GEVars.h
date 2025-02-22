@@ -42,7 +42,7 @@ typedef struct { i32 x, y, z; }		iVec3;
 # define GE_COLOR_GREEN	(Color){ 0.0, 0.0, 1.0, 1.0 };
 
 typedef struct {
-	i8		button;
+	u8		button;
 	iVec2	pos;
 }	MouseEvent;
 

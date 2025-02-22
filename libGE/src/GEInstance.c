@@ -1,7 +1,14 @@
 #include "GEPrivate.h"
 
-f32	aimedFPS = 60;
-f32	currentFPS = 0;
+GEInstance	*activeInstance;
+
+f32		aimedFPS = 60;
+f32		currentFPS = 0;
+
+iVec2	mousePos;
+
+static void	_defaultQuitMethod(GEInstance *instance);
+static void	_callQuitFuncOfInstance(void *data, u32 entityID);
 
 void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjection projection)
 {
@@ -48,15 +55,39 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 
 	instance->size = size;
 	instance->bgColor = GE_COLOR_WHITE;
+	instance->quitMethod = _defaultQuitMethod;
+
+	bool defaultContent = 
+		GEAddEventListener(instance->eventBus, GE_EVENT_TYPE_QUIT,
+			GECreateEventListener(_callQuitFuncOfInstance, 0));
+
+	ASSERT(defaultContent,
+		"Failed to initialize default content of instance\n");
+
+	activeInstance = instance;
 }
 
 void	GELaunchInstance(GEInstance *instance)
 {
 	SDL_Event	ev;
 	f32			deltaTime;	
+	
+	GEEvent		keydownEvent;
+	GEEvent		keyupEvent;
+	GEEvent		mouseDownEvent;
+	GEEvent		mouseUpEvent;
+	GEEvent		scrollEvent;
+	GEEvent		quitEvent;
 
 	if (!instance)
 		return ;
+
+	GECreateEvent(instance->eventBus, &keydownEvent, GE_EVENT_TYPE_KEYDOWN);
+	GECreateEvent(instance->eventBus, &keyupEvent, GE_EVENT_TYPE_KEYUP);
+	GECreateEvent(instance->eventBus, &mouseDownEvent, GE_EVENT_TYPE_MOUSEDOWN);
+	GECreateEvent(instance->eventBus, &mouseUpEvent, GE_EVENT_TYPE_MOUSEUP);
+	GECreateEvent(instance->eventBus, &scrollEvent, GE_EVENT_TYPE_SCROLL);
+	GECreateEvent(instance->eventBus, &quitEvent, GE_EVENT_TYPE_QUIT);
 
 	instance->running = true;
 	while (instance->running)
@@ -64,7 +95,56 @@ void	GELaunchInstance(GEInstance *instance)
 		while (SDL_PollEvent(&ev))
 		{
 			if (ev.type == SDL_QUIT)
-				instance->running = false;
+				GEPublishEvent(instance->eventBus, quitEvent);
+			else if (ev.type == SDL_MOUSEBUTTONUP)
+			{
+				((MouseEvent *)mouseUpEvent.eventData)->button = ev.button.button;
+				((MouseEvent *)mouseUpEvent.eventData)->pos = newIVec2(ev.button.x, ev.button.y);
+				GEPublishEvent(instance->eventBus, mouseUpEvent);
+			}
+			else if (ev.type == SDL_KEYUP)
+			{
+				keyupEvent.eventData = &ev.key.keysym.scancode;
+				GEPublishEvent(instance->eventBus, keyupEvent);
+			}
+			else if (ev.type == SDL_MOUSEWHEEL)
+			{
+				*(iVec2 *)scrollEvent.eventData = newIVec2(ev.wheel.x, ev.wheel.y);
+				GEPublishEvent(instance->eventBus, scrollEvent);
+			}
+		}
+
+		const u8	*keys = SDL_GetKeyboardState(NULL);
+		u32			mouse = SDL_GetMouseState(&mousePos.x, &mousePos.y);
+		
+		for (SDL_Scancode i = 0; i < SDL_NUM_SCANCODES; i++)
+		{
+			if (keys[i])
+			{
+				keydownEvent.eventData = &i;
+				GEPublishEvent(instance->eventBus, keydownEvent);
+			}
+		}
+
+		if (mouse & SDL_BUTTON_LMASK)
+		{
+			((MouseEvent *)mouseDownEvent.eventData)->button = SDL_BUTTON_LEFT;
+			((MouseEvent *)mouseDownEvent.eventData)->pos = mousePos;
+			GEPublishEvent(instance->eventBus, mouseDownEvent);
+		}
+		
+		if (mouse & SDL_BUTTON_RMASK)
+		{
+			((MouseEvent *)mouseDownEvent.eventData)->button = SDL_BUTTON_RIGHT;
+			((MouseEvent *)mouseDownEvent.eventData)->pos = mousePos;
+			GEPublishEvent(instance->eventBus, mouseDownEvent);
+		}
+
+		if (mouse & SDL_BUTTON_MMASK)
+		{
+			((MouseEvent *)mouseDownEvent.eventData)->button = SDL_BUTTON_MIDDLE;
+			((MouseEvent *)mouseDownEvent.eventData)->pos = mousePos;
+			GEPublishEvent(instance->eventBus, mouseDownEvent);
 		}
 
 		glClearColor(instance->bgColor.r, instance->bgColor.g,
@@ -92,6 +172,13 @@ void	GELaunchInstance(GEInstance *instance)
 		if (instance->debugMode)
 			currentFPS = 1.0f / deltaTime;
 	}
+
+	GEDestroyEvent(instance->eventBus, &keydownEvent);
+	GEDestroyEvent(instance->eventBus, &keyupEvent);
+	GEDestroyEvent(instance->eventBus, &mouseDownEvent);
+	GEDestroyEvent(instance->eventBus, &mouseUpEvent);
+	GEDestroyEvent(instance->eventBus, &scrollEvent);
+	GEDestroyEvent(instance->eventBus, &quitEvent);
 }
 
 void	GEDestroyInstance(GEInstance *instance)
@@ -110,4 +197,38 @@ void	GEDestroyInstance(GEInstance *instance)
 	SDL_Quit();
 
 	GEPAllocStats();
+}
+
+void	GESetBackgroundColor(GEInstance *instance, Color bgCol)
+{
+	ASSERT(instance,
+		"Trying to change background color of a NULL instance\n");
+
+	instance->bgColor = bgCol;
+}
+
+void	GESetQuitMethod(GEInstance *instance, void (*newQuitMethod)(GEInstance *instance))
+{
+	ASSERT(instance,
+		"Trying to change quit method of a NULL instance\n");
+
+	instance->quitMethod = newQuitMethod;
+}
+
+GEInstance	*GEPGetActiveInstance()
+{
+	return (activeInstance);
+}
+
+static void _defaultQuitMethod(GEInstance *instance)
+{
+	instance->running = false;
+}
+
+static void	_callQuitFuncOfInstance(void *data, u32 entityID)
+{
+	GEInstance	*instance = data;
+
+	instance->quitMethod(instance);
+	entityID = 0;
 }

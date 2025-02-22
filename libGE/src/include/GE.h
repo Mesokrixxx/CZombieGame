@@ -8,14 +8,18 @@
 # include "GEECS.h"
 # include "GEEventBus.h"
 
-typedef struct {
+typedef struct GEInstance {
 	SDL_Window		*window;
 	SDL_GLContext	glContext;
 	GEECS			*ecs;
 	GEEventBus		*eventBus;
+
 	Color			bgColor;
 	iVec2			size;
+	
 	bool			debugMode;
+	
+	void			(*quitMethod)(struct GEInstance *);
 	bool			running;
 }	GEInstance;
 
@@ -23,5 +27,8 @@ typedef struct {
 void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjection projection);
 void	GELaunchInstance(GEInstance *instance);
 void	GEDestroyInstance(GEInstance *instance);
+
+void	GESetBackgroundColor(GEInstance *instance, Color bgCol);
+void	GESetQuitMethod(GEInstance *instance, void (*newQuitMethod)(GEInstance *instance));
 
 #endif

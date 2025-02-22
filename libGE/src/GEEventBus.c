@@ -4,6 +4,7 @@ static void	_clearSS(void *ss) { GEDestroySparseSet(ss); _free(ss); }
 static void *_defaultMouseclickCreator();
 static void *_defaultScancodeCreator();
 static void *_defaultScrollCreator();
+static void	*_defaulQuitCreator();
 
 GEEventListener	GECreateEventListener(void (*callback)(void *data, u32 entityID), u32 listenerID)
 {
@@ -13,6 +14,39 @@ GEEventListener	GECreateEventListener(void (*callback)(void *data, u32 entityID)
 GEEventType	GECreateEventType(u32 eventTypeID, void *(*defaultCreator)(void), void (*defaultRemover)(void *))
 {
 	return ((GEEventType){ eventTypeID, defaultCreator, defaultRemover });
+}
+
+void	GECreateEvent(GEEventBus *eventBus, GEEvent *event, u32 eventType)
+{
+	ASSERT(eventBus,
+		"Trying to create an event but given eventbus is NULL\n");
+
+	event->eventType = eventType;
+	event->eventData = NULL;
+	for (u32 i = 0; i < eventBus->eventTypeCount; i++)
+	{
+		if (eventBus->eventTypes[i].eventType == eventType)
+		{
+			if (eventBus->eventTypes[i].defaultCreator)
+				event->eventData = eventBus->eventTypes[i].defaultCreator();
+			break ;
+		}
+		ASSERT(i != eventBus->eventTypeCount - 1,
+			"Trying to create an event with non existent event type\n");
+	}
+}
+
+void	GEDestroyEvent(GEEventBus *eventBus, GEEvent *event)
+{
+	for (u32 i = 0; i < eventBus->eventTypeCount; i++)
+	{
+		if (eventBus->eventTypes[i].eventType == event->eventType)
+		{
+			if (eventBus->eventTypes[i].defaultRemover)
+				eventBus->eventTypes[i].defaultRemover(event->eventData);
+			break ;
+		}
+	}
 }
 
 bool	GECreateEventBus(GEEventBus *eventBus)
@@ -28,11 +62,16 @@ bool	GECreateEventBus(GEEventBus *eventBus)
 	if (!GECreateSparseSet(eventBus->listeners, sizeof(GESparseSet), GE_EVENTTYPE_CHUNK_SIZE, NULL, _clearSS))
 		return (_free(eventBus->listeners), false);
 
+	eventBus->eventTypes = _malloc(sizeof(GEEventType) * GE_EVENTTYPE_CHUNK_SIZE);
+	if (!eventBus->eventTypes)
+		return (_clearSS(eventBus->listeners), false);
+	eventBus->eventTypeCount = 0;
+
 	defaultContent =
 		GERegisterEventType(eventBus, GECreateEventType(
-			GE_EVENT_TYPE_MOUSEDOWN, _defaultMouseclickCreator, NULL))
+			GE_EVENT_TYPE_MOUSEDOWN, _defaultMouseclickCreator, GEPFree))
 		&& GERegisterEventType(eventBus, GECreateEventType(
-			GE_EVENT_TYPE_MOUSEUP, _defaultMouseclickCreator, NULL))
+			GE_EVENT_TYPE_MOUSEUP, _defaultMouseclickCreator, GEPFree))
 		&& GERegisterEventType(eventBus, GECreateEventType(
 			GE_EVENT_TYPE_KEYDOWN, _defaultScancodeCreator, NULL))
 		&& GERegisterEventType(eventBus, GECreateEventType(
@@ -40,7 +79,7 @@ bool	GECreateEventBus(GEEventBus *eventBus)
 		&& GERegisterEventType(eventBus, GECreateEventType(
 			GE_EVENT_TYPE_SCROLL, _defaultScrollCreator, NULL))
 		&& GERegisterEventType(eventBus, GECreateEventType(
-			GE_EVENT_TYPE_QUIT, NULL, NULL));
+			GE_EVENT_TYPE_QUIT, _defaulQuitCreator, NULL));
 
 	return (defaultContent);
 }
@@ -69,7 +108,23 @@ bool	GERegisterEventType(GEEventBus *eventBus, GEEventType eventType)
 	ASSERT(eventBus,
 		"Trying to add an event listener but given eventbus is NULL\n");
 
-	if (!GECreateSparseSet(&ss, sizeof(GEEventListener), GE_EVENT_LISTENERS_CHUNK_SIZE, eventType.defaultCreator, eventType.defaultRemover))
+	if (eventBus->eventTypeCount > 0 && eventBus->eventTypeCount % GE_EVENTTYPE_CHUNK_SIZE == 0)
+	{
+		GEEventType	*tempRealloc;
+
+		tempRealloc = _realloc(eventBus->eventTypeCount * sizeof(GEEventType),
+			(eventBus->eventTypeCount + GE_EVENTTYPE_CHUNK_SIZE) * sizeof(GEEventType),
+			eventBus->eventTypes)
+		if (!tempRealloc)
+			return (false);
+
+		eventBus->eventTypes = tempRealloc;
+	}
+
+	eventBus->eventTypes[eventBus->eventTypeCount] = eventType;
+	eventBus->eventTypeCount++;
+
+	if (!GECreateSparseSet(&ss, sizeof(GEEventListener), GE_EVENT_LISTENERS_CHUNK_SIZE, NULL, NULL))
 		return (false);
 
 	if (!GEAddToSparseSet(eventBus->listeners, &ss, eventType.eventType))
@@ -85,6 +140,7 @@ void	GEDestroyEventBus(GEEventBus *eventBus)
 
 	GEDestroySparseSet(eventBus->listeners);
 	_free(eventBus->listeners);
+	_free(eventBus->eventTypes);
 }
 
 void	GEPublishEvent(GEEventBus *eventBus, GEEvent event)
@@ -120,25 +176,25 @@ static void *_defaultMouseclickCreator()
 
 static void *_defaultScancodeCreator()
 {
-	SDL_Scancode	*scancode;
+	SDL_Scancode	scancode;
+	SDL_Scancode	*scancode_ptr;
 
-	scancode = _malloc(sizeof(SDL_Scancode));
-	if (!scancode)
-		return (NULL);
-
-	*scancode = SDL_SCANCODE_0;
-	return (scancode);
+	scancode = SDL_SCANCODE_0;
+	scancode_ptr = &scancode;
+	return (scancode_ptr);
 }
 
 static void *_defaultScrollCreator()
 {
-	iVec2	*scroll;
+	iVec2	scroll;
+	iVec2	*scroll_ptr;
 
-	scroll = _malloc(sizeof(iVec2));
-	if (!scroll)
-		return (NULL);
+	scroll = (iVec2){ 0 };
+	scroll_ptr = &scroll;
+	return (scroll_ptr);
+}
 
-	scroll->x = 0;
-	scroll->y = 0;
-	return (scroll);
+static void	*_defaulQuitCreator()
+{
+	return (GEPGetActiveInstance());
 }

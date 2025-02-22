@@ -32,11 +32,15 @@ typedef struct {
 
 typedef struct {
 	GESparseSet	*listeners;
+	GEEventType	*eventTypes;
+	u32			eventTypeCount;
 }	GEEventBus;
 
-GEEventListener	GECreateEventListener(void (*callback)(void *data, u32 entityID), u32 listenerID);
+GEEventListener	GECreateEventListener(void (*callback)(void *data, u32 entityID), u32 linkedEntityID);
 GEEventType		GECreateEventType(u32 eventTypeID, void *(*defaultCreator)(void), void (*defaultRemover)(void *));
 
+void			GECreateEvent(GEEventBus *eventBus, GEEvent *event, u32 eventType);
+void			GEDestroyEvent(GEEventBus *eventBus, GEEvent *event);
 bool			GECreateEventBus(GEEventBus *eventBus);
 bool			GEAddEventListener(GEEventBus *eventBus,  u32 eventTypeID, GEEventListener listener);
 bool			GERegisterEventType(GEEventBus *eventBus, GEEventType eventType);
