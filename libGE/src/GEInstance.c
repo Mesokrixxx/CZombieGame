@@ -7,13 +7,18 @@ f32		currentFPS = 0;
 
 iVec2	mousePos;
 
-static void	_defaultQuitMethod(GEInstance *instance);
+static void _defaultQuitMethod(GEInstance *instance);
+static void	_quitListener(void *, void *, u32);
 static void	_callQuitFuncOfInstance(void *data, u32 entityID);
 
 void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjection projection)
 {
 	if (!instance)
 		return ;
+
+	instance->size = size;
+	instance->bgColor = GE_COLOR_WHITE;
+	instance->quitMethod = _defaultQuitMethod;
 
 	ASSERT(!SDL_Init(SDL_INIT_VIDEO),
 		"Failed to initialize SDL: %s\n", SDL_GetError());
@@ -57,13 +62,9 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 	ASSERT(instance->graphics && GEInitGraphics(instance->graphics, instance->size, projection),
 		"Failed to create graphics for instance\n");
 
-	instance->size = size;
-	instance->bgColor = GE_COLOR_WHITE;
-	instance->quitMethod = _defaultQuitMethod;
-
 	bool defaultContent = 
 		GEAddEventListener(instance->eventBus, GE_EVENT_TYPE_QUIT,
-			GECreateEventListener(_callQuitFuncOfInstance, 0));
+			GECreateEventListener(_quitListener, 0));
 
 	ASSERT(defaultContent,
 		"Failed to initialize default content of instance\n");
@@ -74,7 +75,7 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 void	GELaunchInstance(GEInstance *instance)
 {
 	SDL_Event	ev;
-	f32			deltaTime;	
+	f32			deltaTime = 0;	
 	
 	GEEvent		keydownEvent;
 	GEEvent		keyupEvent;
@@ -99,22 +100,22 @@ void	GELaunchInstance(GEInstance *instance)
 		while (SDL_PollEvent(&ev))
 		{
 			if (ev.type == SDL_QUIT)
-				GEPublishEvent(instance->eventBus, quitEvent);
+				GEPublishEvent(instance, quitEvent);
 			else if (ev.type == SDL_MOUSEBUTTONUP)
 			{
 				((MouseEvent *)mouseUpEvent.eventData)->button = ev.button.button;
 				((MouseEvent *)mouseUpEvent.eventData)->pos = newIVec2(ev.button.x, ev.button.y);
-				GEPublishEvent(instance->eventBus, mouseUpEvent);
+				GEPublishEvent(instance, mouseUpEvent);
 			}
 			else if (ev.type == SDL_KEYUP)
 			{
 				keyupEvent.eventData = &ev.key.keysym.scancode;
-				GEPublishEvent(instance->eventBus, keyupEvent);
+				GEPublishEvent(instance, keyupEvent);
 			}
 			else if (ev.type == SDL_MOUSEWHEEL)
 			{
 				*(iVec2 *)scrollEvent.eventData = newIVec2(ev.wheel.x, ev.wheel.y);
-				GEPublishEvent(instance->eventBus, scrollEvent);
+				GEPublishEvent(instance, scrollEvent);
 			}
 		}
 
@@ -126,7 +127,7 @@ void	GELaunchInstance(GEInstance *instance)
 			if (keys[i])
 			{
 				keydownEvent.eventData = &i;
-				GEPublishEvent(instance->eventBus, keydownEvent);
+				GEPublishEvent(instance, keydownEvent);
 			}
 		}
 
@@ -134,21 +135,21 @@ void	GELaunchInstance(GEInstance *instance)
 		{
 			((MouseEvent *)mouseDownEvent.eventData)->button = SDL_BUTTON_LEFT;
 			((MouseEvent *)mouseDownEvent.eventData)->pos = mousePos;
-			GEPublishEvent(instance->eventBus, mouseDownEvent);
+			GEPublishEvent(instance, mouseDownEvent);
 		}
 		
 		if (mouse & SDL_BUTTON_RMASK)
 		{
 			((MouseEvent *)mouseDownEvent.eventData)->button = SDL_BUTTON_RIGHT;
 			((MouseEvent *)mouseDownEvent.eventData)->pos = mousePos;
-			GEPublishEvent(instance->eventBus, mouseDownEvent);
+			GEPublishEvent(instance, mouseDownEvent);
 		}
 
 		if (mouse & SDL_BUTTON_MMASK)
 		{
 			((MouseEvent *)mouseDownEvent.eventData)->button = SDL_BUTTON_MIDDLE;
 			((MouseEvent *)mouseDownEvent.eventData)->pos = mousePos;
-			GEPublishEvent(instance->eventBus, mouseDownEvent);
+			GEPublishEvent(instance, mouseDownEvent);
 		}
 
 		glClearColor(instance->bgColor.r, instance->bgColor.g,
@@ -164,7 +165,7 @@ void	GELaunchInstance(GEInstance *instance)
 				u32	*flags = instance->ecs->entities->comp[j];
 
 				if ((*flags & system->requiredFlags) == system->requiredFlags)
-					system->action(instance->ecs, instance->ecs->entities->sparse[j]);
+					system->action(instance, instance->ecs->entities->sparse[j], deltaTime);
 			}
 		}
 
@@ -227,9 +228,18 @@ GEInstance	*GEPGetActiveInstance()
 	return (activeInstance);
 }
 
-static void _defaultQuitMethod(GEInstance *instance)
+static void	_defaultQuitMethod(GEInstance *instance)
 {
 	instance->running = false;
+}
+
+static void _quitListener(void *vinstance, void *nuldata, u32 nulID)
+{
+	GEInstance	*instance = vinstance;
+
+	instance->quitMethod(instance);
+	(void)nulID;
+	(void)nuldata;
 }
 
 static void	_callQuitFuncOfInstance(void *data, u32 entityID)

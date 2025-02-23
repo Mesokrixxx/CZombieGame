@@ -17,10 +17,10 @@ typedef struct {
 
 typedef struct {
 	u32		requiredFlags;
-	void	(*action)(GEECS *ecs, u32 entityID);
+	void	(*action)(void *instance, u32 entityID, f32 dt);
 }	GESystem;
 
-GESystem	GECreateSystem(u32 requiredFlags, void (*action)(GEECS *ecs, u32 entityID));
+GESystem	GECreateSystem(u32 requiredFlags, void (*action)(void *instance, u32 entityID, f32 dt));
 
 typedef struct {
 	u32		compID;

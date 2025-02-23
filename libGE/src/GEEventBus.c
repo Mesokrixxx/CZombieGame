@@ -4,9 +4,8 @@ static void	_clearSS(void *ss) { GEDestroySparseSet(ss); _free(ss); }
 static void *_defaultMouseclickCreator();
 static void *_defaultScancodeCreator();
 static void *_defaultScrollCreator();
-static void	*_defaulQuitCreator();
 
-GEEventListener	GECreateEventListener(void (*callback)(void *data, u32 entityID), u32 listenerID)
+GEEventListener	GECreateEventListener(void (*callback)(void *instance, void *data, u32 entityID), u32 listenerID)
 {
 	return ((GEEventListener){ callback, listenerID });
 }
@@ -79,7 +78,7 @@ bool	GECreateEventBus(GEEventBus *eventBus)
 		&& GERegisterEventType(eventBus, GECreateEventType(
 			GE_EVENT_TYPE_SCROLL, _defaultScrollCreator, NULL))
 		&& GERegisterEventType(eventBus, GECreateEventType(
-			GE_EVENT_TYPE_QUIT, _defaulQuitCreator, NULL));
+			GE_EVENT_TYPE_QUIT, NULL, NULL));
 
 	return (defaultContent);
 }
@@ -143,14 +142,16 @@ void	GEDestroyEventBus(GEEventBus *eventBus)
 	_free(eventBus->eventTypes);
 }
 
-void	GEPublishEvent(GEEventBus *eventBus, GEEvent event)
+void	GEPublishEvent(void *vinstance, GEEvent event)
 {
 	GESparseSet	*ss;
+	GEInstance	*instance;
 
-	ASSERT(eventBus,
-		"Trying to publish an event but given eventbus is NULL\n");
+	ASSERT(instance,
+		"Trying to publish an event but given instance is NULL\n");
 
-	ss = GEGetFromSparseSet(eventBus->listeners, event.eventType);
+	instance = vinstance;
+	ss = GEGetFromSparseSet(instance->eventBus->listeners, event.eventType);
 	ASSERT(ss,
 		"Trying to publish an event to a non existent event type\n");
 
@@ -158,7 +159,7 @@ void	GEPublishEvent(GEEventBus *eventBus, GEEvent event)
 	{
 		GEEventListener	*listener = ss->comp[i];
 	
-		listener->callback(event.eventData, listener->linkedEntityID);
+		listener->callback(vinstance, event.eventData, listener->linkedEntityID);
 	}
 }
 
@@ -192,9 +193,4 @@ static void *_defaultScrollCreator()
 	scroll = (iVec2){ 0 };
 	scroll_ptr = &scroll;
 	return (scroll_ptr);
-}
-
-static void	*_defaulQuitCreator()
-{
-	return (GEPGetActiveInstance());
 }

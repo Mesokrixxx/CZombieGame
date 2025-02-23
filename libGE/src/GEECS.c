@@ -138,7 +138,7 @@ GEComponent	GECreateComponent(u32 compID, size_t compSize, void *(*defaultCreato
 	return ((GEComponent){ compID, compSize, defaultCreator, defaultRemover });
 }
 
-GESystem	GECreateSystem(u32 requiredFlags, void (*action)(GEECS *ecs, u32 entityID))
+GESystem	GECreateSystem(u32 requiredFlags, void (*action)(void *instance, u32 entityID, f32 dt))
 {
 	return ((GESystem){ requiredFlags, action });
 }

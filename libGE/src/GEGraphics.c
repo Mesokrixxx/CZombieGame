@@ -39,19 +39,22 @@ bool	GEInitGraphics(GEGraphics *graphics, iVec2 size, GEProjection proj)
 	ASSERT(graphics,
 		"Trying to init graphics for instance but given one is NULL\n");
 
+	graphics->projectionMatrice = _malloc(sizeof(f32) * 16);
+	if (!graphics->projectionMatrice)
+		return (false);
 	GEMat4x4ToFloat(graphics->projectionMatrice, GECreateProjectionMatrice(size, proj));
 
 	graphics->VOs = _malloc(sizeof(GESparseSet));
 	if (!graphics->VOs)
 		return (false);
 	if (!GECreateSparseSet(graphics->VOs, sizeof(GEVertexObject), GE_VOS_CHUNK_SIZE, NULL, GEDestroyVO))
-		return (_free(graphics->VOs), false);
+		return (_free(graphics->VOs), _free(graphics->projectionMatrice), false);
 		
 	graphics->shaders = _malloc(sizeof(GESparseSet));
 	if (!graphics->shaders)
 		return (false);
 	if (!GECreateSparseSet(graphics->shaders, sizeof(GLuint), GE_SHADERPROGS_CHUNK_SIZE, NULL, GEDestroyShader))
-		return (_clearSS(graphics->VOs), _free(graphics->shaders), false);
+		return (_clearSS(graphics->VOs), _free(graphics->shaders), _free(graphics->projectionMatrice), false);
 	
 	return (true);
 }
@@ -86,7 +89,7 @@ bool	GERegisterVO(GEGraphics *graphics, GEVertexObject vo, u32 voID)
 	return (GEAddToSparseSet(graphics->VOs, &vo, voID));
 }
 
-void	GEUseShader(GEGraphics *graphics, u32 shaderID)
+GLuint	GEUseShader(GEGraphics *graphics, u32 shaderID)
 {
 	static bool	firstSet = true;
 
@@ -99,6 +102,7 @@ void	GEUseShader(GEGraphics *graphics, u32 shaderID)
 		lastUseShaderProgID = shaderID;
 		firstSet = false;
 	}
+	return (*(GLuint *)GEGetFromSparseSet(graphics->shaders, shaderID));
 }
 
 void	GEUseVAO(GEGraphics *graphics, u32 voID)
@@ -123,6 +127,7 @@ void	GEDestroyGraphics(GEGraphics *graphics)
 
 	_clearSS(graphics->shaders);
 	_clearSS(graphics->VOs);
+	_free(graphics->projectionMatrice);
 }
 
 static bool	_createShaderProgram(GEGraphics *graphics, GLuint *shaderProg, const char *vertPath, const char *fragPath)

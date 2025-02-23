@@ -26,7 +26,7 @@ typedef struct {
 }	GEEventType;
 
 typedef struct {
-	void	(*callback)(void *, u32);
+	void	(*callback)(void *, void *, u32);
 	u32		linkedEntityID;
 }	GEEventListener;
 
@@ -36,7 +36,7 @@ typedef struct {
 	u32			eventTypeCount;
 }	GEEventBus;
 
-GEEventListener	GECreateEventListener(void (*callback)(void *data, u32 entityID), u32 linkedEntityID);
+GEEventListener	GECreateEventListener(void (*callback)(void *instance, void *data, u32 entityID), u32 linkedEntityID);
 GEEventType		GECreateEventType(u32 eventTypeID, void *(*defaultCreator)(void), void (*defaultRemover)(void *));
 
 void			GECreateEvent(GEEventBus *eventBus, GEEvent *event, u32 eventType);
@@ -46,6 +46,6 @@ bool			GEAddEventListener(GEEventBus *eventBus,  u32 eventTypeID, GEEventListene
 bool			GERegisterEventType(GEEventBus *eventBus, GEEventType eventType);
 void			GEDestroyEventBus(GEEventBus *eventBus);
 
-void			GEPublishEvent(GEEventBus *eventBus, GEEvent event);
+void			GEPublishEvent(void *vinstance, GEEvent event);
 
 #endif

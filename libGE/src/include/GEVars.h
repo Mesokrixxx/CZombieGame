@@ -44,12 +44,6 @@ typedef struct { f32 x, y, z, w; }	Vec4;
 typedef struct { i32 x, y, z, w; }	iVec4;
 typedef struct { Vec4 a, b, c, d; }	Mat4x4;
 
-# define GE_COLOR_WHITE	(Color){ 1.0, 1.0, 1.0, 1.0 };
-# define GE_COLOR_BLACK	(Color){ 0.0, 0.0, 0.0, 1.0 };
-# define GE_COLOR_RED	(Color){ 1.0, 0.0, 0.0, 1.0 };
-# define GE_COLOR_BLUE	(Color){ 0.0, 1.0, 0.0, 1.0 };
-# define GE_COLOR_GREEN	(Color){ 0.0, 0.0, 1.0, 1.0 };
-
 typedef struct {
 	u8		button;
 	iVec2	pos;
