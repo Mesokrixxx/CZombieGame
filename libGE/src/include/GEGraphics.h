@@ -21,7 +21,7 @@ typedef struct {
 
 bool			GEInitGraphics(GEGraphics *graphics, iVec2 size, GEProjection proj);
 bool			GERegisterShaderProgram(GEGraphics *graphics, const char *vertexFilePath, const char *fragFilePath, u32 shaderID);
-bool			GERegisterVO(GEGraphics *graphics, GEVertexObject *vo, u32 voID);
+bool			GERegisterVO(GEGraphics *graphics, GEVertexObject vo, u32 voID);
 void			GEUseShader(GEGraphics *graphics, u32 shaderID);
 void			GEUseVAO(GEGraphics *graphics, u32 voID);
 void			GEDestroyGraphics(GEGraphics *graphics);

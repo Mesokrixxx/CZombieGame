@@ -65,13 +65,15 @@ void	LoadContent(GEInstance *instance)
 	GERegisterComponent(instance->ecs, GECreateComponent(
 		VEL_COMP, sizeof(VelComp), _DefaultVelCompCreator, NULL));
 
-	GERegisterShaderProgram(instance->graphics,
-		"src/res/shaders/circle.vert", "src/res/shaders/circle.frag", SHADERPROG_CIRCLE);
-	
+	if (!GERegisterShaderProgram(instance->graphics,
+		"src/res/shaders/circle.vert", "src/res/shaders/circle.frag", SHADERPROG_CIRCLE))
+		printf("Failed to create shader prog\n");
+
 	if (!_createCircleVAO(&circleVAO, &circleVBO, 32))
 		return ((void)printf("Failed to create cirle VAO\n"));
 	circleVO = GECreateVertexObject(circleVAO, circleVBO);
-	GERegisterVO(instance->graphics, &circleVO, VO_CIRCLE);
+	if (!GERegisterVO(instance->graphics, circleVO, VO_CIRCLE))
+		printf("Failed to register new VO\n");
 }
 
 static void	*_DefaultVec2Creator() { return (&(Vec2){ 0 }); }

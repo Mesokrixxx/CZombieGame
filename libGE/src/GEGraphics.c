@@ -5,8 +5,8 @@ GLuint	lastUseVAOID;
 
 static void	_clearSS(void *ss) { GEDestroySparseSet(ss); _free(ss); }
 static bool _createShaderProgram(GEGraphics *, GLuint *, const char *, const char *);
-static bool	_compileShader(GLuint *, GLenum type, const char *);
-static char	*_getFileContent(const char *path);
+static bool	_compileShader(GLuint *, GLenum, const char *);
+static char	*_getFileContent(const char *);
 
 GEVertexObject	GECreateVertexObject(GLuint VAO, GLuint VBO)
 {
@@ -23,6 +23,7 @@ void	GEDestroyVO(void *vVO)
 	VO = vVO;
 	glDeleteVertexArrays(1, &VO->VAO);
 	glDeleteBuffers(1, &VO->VBO);
+	_free(vVO);
 }
 
 void	GEDestroyShader(void *sshader)
@@ -30,6 +31,7 @@ void	GEDestroyShader(void *sshader)
 	GLuint	shader = *(GLuint *)sshader;
 
 	glDeleteProgram(shader);
+	_free(sshader);
 }
 
 bool	GEInitGraphics(GEGraphics *graphics, iVec2 size, GEProjection proj)
@@ -73,15 +75,15 @@ bool	GERegisterShaderProgram(GEGraphics *graphics, const char *vertexFilePath, c
 	return (GEAddToSparseSet(graphics->shaders, &shaderProg, shaderID));
 }
 
-bool	GERegisterVO(GEGraphics *graphics, GEVertexObject *vo, u32 voID)
+bool	GERegisterVO(GEGraphics *graphics, GEVertexObject vo, u32 voID)
 {
 	ASSERT(graphics,
 		"Failed to register VO, given graphics is NULL\n");
 
-	ASSERT(vo || !GEGetFromSparseSet(graphics->VOs, voID),
+	ASSERT(!GEGetFromSparseSet(graphics->VOs, voID),
 		"Failed to register VO, given one is NULL or already set\n");
 
-	return (GEAddToSparseSet(graphics->VOs, vo, voID));
+	return (GEAddToSparseSet(graphics->VOs, &vo, voID));
 }
 
 void	GEUseShader(GEGraphics *graphics, u32 shaderID)
@@ -119,10 +121,8 @@ void	GEDestroyGraphics(GEGraphics *graphics)
 	ASSERT(graphics,
 		"Trying to destroy NULL graphics\n");
 
-	GEDestroySparseSet(graphics->VOs);
-	_free(graphics->VOs);
-	GEDestroySparseSet(graphics->shaders);
-	_free(graphics->shaders);
+	_clearSS(graphics->shaders);
+	_clearSS(graphics->VOs);
 }
 
 static bool	_createShaderProgram(GEGraphics *graphics, GLuint *shaderProg, const char *vertPath, const char *fragPath)
@@ -144,6 +144,7 @@ static bool	_createShaderProgram(GEGraphics *graphics, GLuint *shaderProg, const
 	{
 		_free(fragSource);
 		_free(vertSource);
+		return (false);
 	}
 
 	*shaderProg = glCreateProgram();
@@ -209,12 +210,12 @@ static char	*_getFileContent(const char *path)
 	fseek(f, 0, SEEK_END);
 	fsize = ftell(f);
 	fseek(f, 0, SEEK_SET);
-
+	
 	fcontent = _malloc(sizeof(char) * (fsize + 1));
 	if (!fcontent)
 		return ((void)fclose(f), NULL);
 	
-	if (fread(fcontent, fsize, sizeof(char), f) < fsize)	
+	if (fread(fcontent, fsize, sizeof(char), f) < 1)	
 		return (fclose(f), _free(fcontent), NULL);
 	fclose(f);
 	fcontent[fsize] = '\0';
