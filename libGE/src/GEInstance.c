@@ -1,7 +1,5 @@
 #include "GEPrivate.h"
 
-GEInstance	*activeInstance;
-
 f32		aimedFPS = 60;
 f32		currentFPS = 0;
 
@@ -68,8 +66,6 @@ void	GECreateInstance(GEInstance *instance, char *title, iVec2 size, GEProjectio
 
 	ASSERT(defaultContent,
 		"Failed to initialize default content of instance\n");
-
-	activeInstance = instance;
 }
 
 void	GELaunchInstance(GEInstance *instance)
@@ -221,11 +217,6 @@ void	GESetQuitMethod(GEInstance *instance, void (*newQuitMethod)(GEInstance *ins
 		"Trying to change quit method of a NULL instance\n");
 
 	instance->quitMethod = newQuitMethod;
-}
-
-GEInstance	*GEPGetActiveInstance()
-{
-	return (activeInstance);
 }
 
 static void	_defaultQuitMethod(GEInstance *instance)

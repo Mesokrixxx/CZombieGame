@@ -20,8 +20,6 @@ void MovementSystem(void *vinstance, u32 entityID, f32 dt)
 		}
 
 		// Decelerate
-		if (entityVel->deceleration > 1)
-			entityVel->deceleration = 1;
 		if (currentSpeed > 0 && entityVel->deceleration > 0) // if deceleration equal to 0 then no deceleration
 		{
 			f32 scale = 1 - entityVel->deceleration * dt;

@@ -17,7 +17,7 @@ void	NewPlayer(GEInstance *instance)
 	*playerPos = newVec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
 	playerVel->acceleration = 50;
-	playerVel->deceleration = 100;
+	playerVel->deceleration = 10;
 	playerVel->maxSpeed = 200;
 
 	playerSprite->radius = 16;
