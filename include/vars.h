@@ -29,5 +29,12 @@ typedef struct { f32 r, g, b, a; }	color;
 # define DEFAULT_WINDOW_HEIGHT	720
 
 # define ASSERT(_c, ...) if (!(_c)) { fprintf(stderr, __VA_ARGS__); exit(1); }
+# define _malloc(size)					debug_malloc(size)
+# define _free(ptr)						debug_free(ptr)
+# define _realloc(ptr, oldsize, size)	debug_realloc(ptr, oldsize, size)
+
+void	*debug_malloc(size_t size);
+void	debug_free(void *ptr);
+void	*debug_realloc(void *ptr, size_t oldsize, size_t size);
 
 #endif

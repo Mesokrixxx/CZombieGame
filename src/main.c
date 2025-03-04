@@ -2,7 +2,9 @@
 
 ZombieGame	game;
 
-int main(void)
+void	printAllocStats();
+
+int main(int argc, char *argv[])
 {
 	ASSERT(!SDL_Init(SDL_INIT_VIDEO),
 		"Failed to init SDL: %s\n", SDL_GetError());
@@ -46,13 +48,7 @@ int main(void)
 		{
 			if (ev.type == SDL_QUIT)
 				game.running = false;
-			else if (ev.type == SDL_WINDOWEVENT_RESIZED)
-				SDL_GetWindowSize(game.window.window,
-					&game.window.width, &game.window.height);
 		}
-
-		printf("%d ", game.window.width);
-		printf("%d\n", game.window.height);
 
 		glClearColor(game.window.color.r, game.window.color.g,
 			game.window.color.b, game.window.color.a);
@@ -63,5 +59,42 @@ int main(void)
 	SDL_GL_DeleteContext(game.window.context);
 	SDL_DestroyWindow(game.window.window);
 	SDL_Quit();
+
+	printAllocStats();
 	return (0);
+}
+
+size_t	allocCount;
+size_t	allocSize;
+
+void	printAllocStats()
+{
+	printf("Still %zu allocation to free.\nAllocated %zu bytes:\n %zu KO\n %zu MO\n",
+		allocCount, allocSize, allocSize / 1024, allocSize / 1024 / 1024);
+}
+
+void	*debug_malloc(size_t size)
+{
+	void	*ptr;
+
+	ptr = malloc(size);
+	if (ptr)
+		allocSize += size; allocCount++;
+	return (ptr);
+}
+
+void	debug_free(void *ptr)
+{
+	allocCount--;
+	free(ptr);
+}
+
+void	*debug_realloc(void *ptr, size_t oldsize, size_t size)
+{
+	void	*reallocated;
+
+	reallocated = realloc(ptr, size);
+	if (reallocated)
+		allocSize += size - oldsize;
+	return (reallocated);
 }
